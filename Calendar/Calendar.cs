@@ -20,7 +20,7 @@ namespace Calendar
 
         public static int[][] InitWeekNumbers(List<int[]> arrayOfWeeks, DateTime date)
         {
-            var weekOfYear = GetWeekOfYear(date.DayOfYear);
+            var weekOfYear = GetWeekOfYear(date.FirstDayOfMonth().DayOfYear);
             foreach (var week in arrayOfWeeks)
                 week[0] = weekOfYear++;
             if (date.Month == 12 && new DateTime(date.Year, 12, 31).DayOfWeek != DayOfWeek.Sunday)
@@ -31,26 +31,22 @@ namespace Calendar
         public static int[][] DistributeByDaysOfTheWeek(DateTime date)
         {
             var daysInMonth = DateTime.DaysInMonth(date.Year, date.Month);
-            var dayOfMonth = 1;
-            var firstDayOfMonth = new DateTime(date.Year, date.Month, 1);
-            var dayOfWeek = DayOfWeekToInt(firstDayOfMonth.DayOfWeek);
-
+            var dayOfWeek = DayOfWeekToInt(date.FirstDayOfMonth().DayOfWeek);
             var result = new List<int[]>();
             var weekDays = new int[DistributionByDayOfWeekMatrixWidth];
-            while (dayOfMonth <= daysInMonth)
+            for (var dayOfMonth = 1; dayOfMonth <= daysInMonth; dayOfMonth++)
             {
                 weekDays[dayOfWeek] = dayOfMonth;
-                dayOfMonth++;
                 dayOfWeek++;
-                if (dayOfWeek <= 7) 
+                if (dayOfWeek <= 7)
                     continue;
                 result.Add(weekDays);
                 weekDays = new int[DistributionByDayOfWeekMatrixWidth];
-                dayOfWeek = 1;
+                dayOfWeek = 1;                
             }
             if (dayOfWeek > 1)
                 result.Add(weekDays);
-            return InitWeekNumbers(result, firstDayOfMonth);
+            return InitWeekNumbers(result, date);
         }
 
         public static int GetWeekOfYear(int dayOfYear)
