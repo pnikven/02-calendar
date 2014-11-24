@@ -15,7 +15,8 @@ namespace Calendar
         {
             var culture = new CultureInfo("ru-RU");
             Date = DateTime.Parse(date, culture);
-            DistributionByDaysOfTheWeek = DistributeByDaysOfTheWeek(Date);
+            var distribution = DistributeByDaysOfTheWeek(Date);
+            DistributionByDaysOfTheWeek = InitWeekNumbers(distribution, Date);
         }
 
         public static int[][] InitWeekNumbers(List<int[]> arrayOfWeeks, DateTime date)
@@ -28,25 +29,18 @@ namespace Calendar
             return arrayOfWeeks.ToArray();
         }
 
-        public static int[][] DistributeByDaysOfTheWeek(DateTime date)
+        public static List<int[]> DistributeByDaysOfTheWeek(DateTime date)
         {
             var daysInMonth = DateTime.DaysInMonth(date.Year, date.Month);
             var dayOfWeek = DayOfWeekToInt(date.FirstDayOfMonth().DayOfWeek);
             var result = new List<int[]>();
-            var weekDays = new int[DistributionByDayOfWeekMatrixWidth];
-            for (var dayOfMonth = 1; dayOfMonth <= daysInMonth; dayOfMonth++)
+            for (var dayOfMonth = 1; dayOfMonth <= daysInMonth; dayOfMonth++, dayOfWeek = dayOfWeek % 7 + 1)
             {
-                weekDays[dayOfWeek] = dayOfMonth;
-                dayOfWeek++;
-                if (dayOfWeek <= 7)
-                    continue;
-                result.Add(weekDays);
-                weekDays = new int[DistributionByDayOfWeekMatrixWidth];
-                dayOfWeek = 1;                
+                if (result.Count==0 || dayOfWeek == 1)
+                    result.Add(new int[DistributionByDayOfWeekMatrixWidth]);
+                result.Last()[dayOfWeek] = dayOfMonth;
             }
-            if (dayOfWeek > 1)
-                result.Add(weekDays);
-            return InitWeekNumbers(result, date);
+            return result;
         }
 
         public static int GetWeekOfYear(int dayOfYear)
