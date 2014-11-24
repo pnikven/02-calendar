@@ -23,30 +23,72 @@ namespace Calendar
         [TestCase("4.1.10", 4, 1, 2010)]
         [TestCase("1.1.0001", 1, 1, 1)]
         [TestCase("1.01.1", 1, 1, 2001)]
-        public void Calendar_DateInRussianCultureFormat_CreatesAppropriateDateTimeInstance(string date, int day, int month, int year)
+        public void Calendar_DateInRussianCultureFormat_CreatesAppropriateDateTimeInstance(
+            string date, int expectedDay, int expectedMonth, int expectedYear)
         {
             var result = new Calendar(date).Date;
 
-            Assert.AreEqual(new DateTime(year, month, day), result);
+            Assert.AreEqual(new DateTime(expectedYear, expectedMonth, expectedDay), result);
         }
 
-        [Test]
-        public void DistributeByDaysOfTheWeek_OnDate_ReturnsMatrixOfDaysDistributedFromMondayToSunday()
+        private static object[] DistributeByDaysOfTheWeekCases =
         {
-            var date = new DateTime(2013, 12, 25);
-            var expected = new[]
+            new object[]
             {
-                new [] {48,0,0,0,0,0,0,1},
-                new [] {49,2,3,4,5,6,7,8},
-                new [] {50,9,10,11,12,13,14,15},
-                new [] {51,16,17,18,19,20,21,22},
-                new [] {52,23,24,25,26,27,28,29},
-                new [] {1,30,31,0,0,0,0,0},
-            };
+                25, 12, 2013, new[]
+                {
+                    new[] {48, 0, 0, 0, 0, 0, 0, 1},
+                    new[] {49, 2, 3, 4, 5, 6, 7, 8},
+                    new[] {50, 9, 10, 11, 12, 13, 14, 15},
+                    new[] {51, 16, 17, 18, 19, 20, 21, 22},
+                    new[] {52, 23, 24, 25, 26, 27, 28, 29},
+                    new[] {1, 30, 31, 0, 0, 0, 0, 0}
+                }
+            },
+            new object[]
+            {
+                21, 12, 2017, new[]
+                {
+                    new[] {48, 0, 0, 0, 0, 1, 2, 3},
+                    new[] {49, 4, 5, 6, 7, 8, 9, 10},
+                    new[] {50, 11, 12, 13, 14, 15, 16, 17},
+                    new[] {51, 18, 19, 20, 21, 22, 23, 24},
+                    new[] {52, 25, 26, 27, 28, 29, 30, 31}
+                }
+            },
+            new object[]
+            {
+                22, 12, 2016, new[]
+                {
+                    new[] {48, 0, 0, 0, 1, 2, 3, 4},
+                    new[] {49, 5, 6, 7, 8, 9, 10, 11},
+                    new[] {50, 12, 13, 14, 15, 16, 17, 18},
+                    new[] {51, 19, 20, 21, 22, 23, 24, 25},
+                    new[] {1, 26, 27, 28, 29, 30, 31, 0}
+                }
+            },
+            new object[]
+            {
+                14, 1, 2015, new[]
+                {
+                    new[] {1, 0, 0, 0, 1, 2, 3, 4},
+                    new[] {2, 5, 6, 7, 8, 9, 10, 11},
+                    new[] {3, 12, 13, 14, 15, 16, 17, 18},
+                    new[] {4, 19, 20, 21, 22, 23, 24, 25},
+                    new[] {5, 26, 27, 28, 29, 30, 31, 0}
+                }
+            }
+        };
+
+        [TestCaseSource("DistributeByDaysOfTheWeekCases")]
+        public void DistributeByDaysOfTheWeek_OnDate_ReturnsMatrixOfDaysDistributedFromMondayToSunday(
+            int day, int month, int year, int[][] expectedDistribution)
+        {
+            var date = new DateTime(year, month, day);
 
             var result = Calendar.DistributeByDaysOfTheWeek(date);
 
-            Assert.AreEqual(expected, result);
+            Assert.AreEqual(expectedDistribution, result);
         }
 
         [TestCase(DayOfWeek.Monday, 1)]

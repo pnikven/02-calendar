@@ -22,17 +22,17 @@ namespace Calendar
             var firstDayOfMonth = new DateTime(date.Year, date.Month, 1);
             var monthDayCount = DateTime.DaysInMonth(date.Year, date.Month);            
 
-            var currentDayOfMonth = 1;
+            var dayOfMonth = 1;
             var dayOfWeek = DayOfWeekToInt(firstDayOfMonth.DayOfWeek);
             var weekNumber = GetWeekNumber(firstDayOfMonth.DayOfYear);            
 
             var result = new List<int[]>();
             var weekDays = new int[ValuesMatrixWidth];
             weekDays[0] = weekNumber;
-            while (currentDayOfMonth<=monthDayCount)
+            while (dayOfMonth<=monthDayCount)
             {
-                weekDays[dayOfWeek] = currentDayOfMonth;
-                currentDayOfMonth++;
+                weekDays[dayOfWeek] = dayOfMonth;
+                dayOfMonth++;
                 dayOfWeek++;
                 if (dayOfWeek <= 7) continue;
                 result.Add(weekDays);
@@ -40,8 +40,11 @@ namespace Calendar
                 weekNumber++;
                 weekDays[0] = weekNumber;
                 dayOfWeek = 1;
-            }
-            result.Add(weekDays);
+            }            
+            if (date.Month == 12) 
+                weekDays[0] = 1;
+            if (dayOfWeek > 1) 
+                result.Add(weekDays);
 
             return result.ToArray();
         }
