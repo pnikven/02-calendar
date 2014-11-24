@@ -5,29 +5,39 @@ namespace Calendar
     class CalendarRender
     {
         private Calendar calendar;
-        private float CellHeight;
-        private float CellWidth;
+        private float width;
+        private float height;
 
         public CalendarRender(Calendar calendar)
         {
             this.calendar = calendar;
-            CellHeight = 1f / (calendar.DistributionByDaysOfTheWeek.Length + 2);
-            CellWidth = 1f / calendar.DistributionByDaysOfTheWeek[0].Length;
         }
 
         public void Draw(Graphics g, Size size)
         {
-            var Width = size.Width;
-            var Height = size.Height;
-            var pen = new Pen(Color.Black);
-            for (var x = CellWidth; x < 1; x += CellWidth)
+            width = size.Width;
+            height = size.Height;
+            var cellWidth = (float)width / (calendar.DistributionByDaysOfTheWeek.Length + 2);
+            var cellHeight = (float)height / calendar.DistributionByDaysOfTheWeek[0].Length;
+
+            var pen = new Pen(Color.Gray);
+            for (var x = cellWidth; x < width; x += cellWidth)
             {
-                g.DrawLine(pen, x * Width, 0, x * Width, Height);
+                g.DrawLine(pen, x, 0, x, height);
             }
-            for (var y = CellHeight; y < 1; y += CellHeight)
+            for (var y = cellHeight; y < height; y += cellHeight)
             {
-                g.DrawLine(pen, 0, y * Height, Width, y * Height);
+                g.DrawLine(pen, 0, y, width, y);
             }
+
+            DrawCalendarHeader(g, cellHeight);
+        }
+
+        private void DrawCalendarHeader(Graphics g, float cellHeight)
+        {
+            var stringFormat=new StringFormat {Alignment = StringAlignment.Center};
+            g.DrawString(calendar.Date.ToShortDateString(),new Font("Arial", cellHeight/2),
+                new SolidBrush(Color.Black), new RectangleF(0,0,width,cellHeight),stringFormat);
         }
     }
 }
