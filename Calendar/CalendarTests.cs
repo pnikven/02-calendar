@@ -31,7 +31,7 @@ namespace Calendar
             Assert.AreEqual(new DateTime(expectedYear, expectedMonth, expectedDay), result);
         }
 
-        private static object[] DistributeByDaysOfTheWeekCases =
+        private static readonly object[] DistributeByDaysOfTheWeekCases =
         {
             new object[]
             {
@@ -110,12 +110,11 @@ namespace Calendar
         [TestCase(8, 2)]
         [TestCase(14, 2)]
         [TestCase(15, 3)]
-        public void GetWeekNumber_DayOfYear_ReturnsNumberOfWeek(int dayOfYear, int expected)
+        public void GetWeekOfYear_DayOfYear_ReturnsWeekOfYear(int dayOfYear, int expected)
         {
-            var result = Calendar.GetWeekNumber(dayOfYear);
+            var result = Calendar.GetWeekOfYear(dayOfYear);
 
             Assert.AreEqual(expected, result);
         }
-
     }
 }

@@ -1,62 +1,70 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 
 namespace Calendar
 {
     class Calendar
     {
-        private const int ValuesMatrixWidth = 8;
+        private const int DistributionByDayOfWeekMatrixWidth = 8;
         public DateTime Date;
-        public int[][] DistributionByDayOfWeek;
+        public int[][] DistributionByDaysOfTheWeek;
 
         public Calendar(string date)
         {
             var culture = new CultureInfo("ru-RU");
             Date = DateTime.Parse(date, culture);
-            DistributionByDayOfWeek = DistributeByDaysOfTheWeek(Date);
+            DistributionByDaysOfTheWeek = DistributeByDaysOfTheWeek(Date);
+        }
+
+        public static int[][] InitWeekNumbers(List<int[]> arrayOfWeeks, DateTime date)
+        {
+            var weekOfYear = GetWeekOfYear(date.DayOfYear);
+            foreach (var week in arrayOfWeeks)
+                week[0] = weekOfYear++;
+            if (date.Month == 12 && new DateTime(date.Year, 12, 31).DayOfWeek != DayOfWeek.Sunday)
+                arrayOfWeeks[arrayOfWeeks.Count - 1][0] = 1;
+            return arrayOfWeeks.ToArray();
         }
 
         public static int[][] DistributeByDaysOfTheWeek(DateTime date)
         {
-            var firstDayOfMonth = new DateTime(date.Year, date.Month, 1);
-            var monthDayCount = DateTime.DaysInMonth(date.Year, date.Month);            
-
+            var daysInMonth = DateTime.DaysInMonth(date.Year, date.Month);
             var dayOfMonth = 1;
+            var firstDayOfMonth = new DateTime(date.Year, date.Month, 1);
             var dayOfWeek = DayOfWeekToInt(firstDayOfMonth.DayOfWeek);
-            var weekNumber = GetWeekNumber(firstDayOfMonth.DayOfYear);            
 
             var result = new List<int[]>();
-            var weekDays = new int[ValuesMatrixWidth];
-            weekDays[0] = weekNumber;
-            while (dayOfMonth<=monthDayCount)
+            var weekDays = CreateWeekDaysArray();
+            while (dayOfMonth <= daysInMonth)
             {
                 weekDays[dayOfWeek] = dayOfMonth;
                 dayOfMonth++;
                 dayOfWeek++;
                 if (dayOfWeek <= 7) continue;
                 result.Add(weekDays);
-                weekDays = new int[ValuesMatrixWidth];
-                weekNumber++;
-                weekDays[0] = weekNumber;
+                weekDays = CreateWeekDaysArray();
                 dayOfWeek = 1;
-            }            
-            if (date.Month == 12) 
-                weekDays[0] = 1;
-            if (dayOfWeek > 1) 
+            }
+            if (dayOfWeek > 1)
                 result.Add(weekDays);
-
-            return result.ToArray();
+            return InitWeekNumbers(result, firstDayOfMonth);
         }
 
-        public static int GetWeekNumber(int dayOfYear)
+        private static int[] CreateWeekDaysArray()
         {
-            return (dayOfYear-1)/7+1;
+            return new int[DistributionByDayOfWeekMatrixWidth];
+        }
+
+        public static int GetWeekOfYear(int dayOfYear)
+        {
+            return (dayOfYear - 1) / 7 + 1;
         }
 
         public static int DayOfWeekToInt(DayOfWeek dayOfWeek)
         {
-            var intRepresentation = (int) dayOfWeek;
+            var intRepresentation = (int)dayOfWeek;
             return intRepresentation == 0 ? 7 : intRepresentation;
         }
     }
