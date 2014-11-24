@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Windows.Forms;
 
 namespace Calendar
 {
@@ -8,6 +9,8 @@ namespace Calendar
         static void Main(string[] args)
         {
             var date = GetFirstParameter(args);
+
+            Application.Run(new CalendarRepresentation());
         }
 
         private static string GetFirstParameter(IList<string> consoleArguments)
