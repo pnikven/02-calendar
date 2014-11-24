@@ -18,6 +18,16 @@ namespace Calendar
 
         public static int[][] InitializeValuesMatrix(DateTime date)
         {
+            var firstDayOfMonth = new DateTime(date.Year, date.Month, 1);
+            var firstDayOfNextMonth = firstDayOfMonth.AddMonths(1);
+            var lastDayOfMonth = firstDayOfNextMonth.AddDays(-1);
+            var dayOfWeek = DayOfWeekToInt(firstDayOfMonth.DayOfWeek);
+
+            throw new NotImplementedException();
+        }
+
+        public static int DayOfWeekToInt(DayOfWeek dayOfWeek)
+        {
             throw new NotImplementedException();
         }
     }

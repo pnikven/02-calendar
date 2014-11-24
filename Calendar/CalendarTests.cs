@@ -6,11 +6,13 @@ namespace Calendar
     [TestFixture]
     class CalendarTests
     {
+        [Test]
         public void Calendar_StringWithIncorrectDate_ThrowsFormatException()
         {
             Assert.Throws<FormatException>(() => new Calendar("incorrect date"));
         }
 
+        [Test]
         public void Calendar_OnNull_ThrowsArgumentNullException()
         {
             Assert.Throws<ArgumentNullException>(() => new Calendar(null));
@@ -28,6 +30,7 @@ namespace Calendar
             Assert.AreEqual(new DateTime(year, month, day), result);
         }
 
+        [Test]
         public void InitializeValuesMatrix_OnDate_ReturnsMatrixOfDaysDistributedByWeeks()
         {
             var date = new DateTime(2013, 12, 25);
@@ -42,6 +45,20 @@ namespace Calendar
             };
 
             var result = Calendar.InitializeValuesMatrix(date);
+
+            Assert.AreEqual(expected, result);
+        }
+
+        [TestCase(DayOfWeek.Monday, 1)]
+        [TestCase(DayOfWeek.Tuesday, 2)]
+        [TestCase(DayOfWeek.Wednesday, 3)]
+        [TestCase(DayOfWeek.Thursday, 4)]
+        [TestCase(DayOfWeek.Friday, 5)]
+        [TestCase(DayOfWeek.Saturday, 6)]
+        [TestCase(DayOfWeek.Sunday, 7)]
+        public void DayOfWeekToInt_DayOfWeek_ConvertsToIntWhereMondayIsTheFirstDayOfWeek(DayOfWeek input, int expected)
+        {
+            var result = Calendar.DayOfWeekToInt(input);
 
             Assert.AreEqual(expected, result);
         }
