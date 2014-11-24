@@ -25,7 +25,25 @@ namespace Calendar
         {
             var result = new Calendar(date).Date;
 
-            Assert.AreEqual(new DateTime(year,month,day), result);
+            Assert.AreEqual(new DateTime(year, month, day), result);
+        }
+
+        public void InitializeValuesMatrix_OnDate_ReturnsMatrixOfDaysDistributedByWeeks()
+        {
+            var date = new DateTime(2013, 12, 25);
+            var expected = new[]
+            {
+                new [] {48,0,0,0,0,0,0,1},
+                new [] {49,2,3,4,5,6,7,8},
+                new [] {50,9,10,11,12,13,14,15},
+                new [] {51,16,17,18,19,20,21,22},
+                new [] {52,23,24,25,26,27,28,29},
+                new [] {1,30,31,0,0,0,0,0},
+            };
+
+            var result = Calendar.InitializeValuesMatrix(date);
+
+            Assert.AreEqual(expected, result);
         }
 
     }

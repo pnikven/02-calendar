@@ -10,7 +10,14 @@ namespace Calendar
         public CalendarRepresentation(Calendar calendar)
         {
             calendarRender=new CalendarRender(calendar);
+            BackColor = Color.FromArgb(255, 242, 242, 242); 
             ResizeRedraw = true;
+        }
+
+        public override sealed Color BackColor
+        {
+            get { return base.BackColor; }
+            set { base.BackColor = value; }
         }
 
         protected override void OnPaint(PaintEventArgs e)
