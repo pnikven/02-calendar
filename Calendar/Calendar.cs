@@ -53,7 +53,8 @@ namespace Calendar
 
         public static int DayOfWeekToInt(DayOfWeek dayOfWeek)
         {
-            throw new NotImplementedException();
+            var intRepresentation = (int) dayOfWeek;
+            return intRepresentation == 0 ? 7 : intRepresentation;
         }
     }
 }
