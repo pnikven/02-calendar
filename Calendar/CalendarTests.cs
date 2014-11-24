@@ -6,6 +6,16 @@ namespace Calendar
     [TestFixture]
     class CalendarTests
     {
+        public void Calendar_StringWithIncorrectDate_ThrowsFormatException()
+        {
+            Assert.Throws<FormatException>(() => new Calendar("incorrect date"));
+        }
+
+        public void Calendar_OnNull_ThrowsArgumentNullException()
+        {
+            Assert.Throws<ArgumentNullException>(() => new Calendar(null));
+        }
+
         [TestCase("24.11.2014", 24, 11, 2014)]
         [TestCase("04.01.2010", 4, 1, 2010)]
         [TestCase("4.1.10", 4, 1, 2010)]
@@ -17,5 +27,6 @@ namespace Calendar
 
             Assert.AreEqual(new DateTime(year,month,day), result);
         }
+
     }
 }
