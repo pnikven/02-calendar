@@ -31,7 +31,7 @@ namespace Calendar
         }
 
         [Test]
-        public void InitializeValuesMatrix_OnDate_ReturnsMatrixOfDaysDistributedByWeeks()
+        public void DistributeByDaysOfTheWeek_OnDate_ReturnsMatrixOfDaysDistributedFromMondayToSunday()
         {
             var date = new DateTime(2013, 12, 25);
             var expected = new[]
@@ -44,7 +44,7 @@ namespace Calendar
                 new [] {1,30,31,0,0,0,0,0},
             };
 
-            var result = Calendar.InitializeValuesMatrix(date);
+            var result = Calendar.DistributeByDaysOfTheWeek(date);
 
             Assert.AreEqual(expected, result);
         }

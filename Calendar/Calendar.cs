@@ -8,16 +8,16 @@ namespace Calendar
     {
         private const int ValuesMatrixWidth = 8;
         public DateTime Date;
-        public int[][] Values;
+        public int[][] DistributionByDayOfWeek;
 
         public Calendar(string date)
         {
             var culture = new CultureInfo("ru-RU");
             Date = DateTime.Parse(date, culture);
-            Values = InitializeValuesMatrix(Date);
+            DistributionByDayOfWeek = DistributeByDaysOfTheWeek(Date);
         }
 
-        public static int[][] InitializeValuesMatrix(DateTime date)
+        public static int[][] DistributeByDaysOfTheWeek(DateTime date)
         {
             var firstDayOfMonth = new DateTime(date.Year, date.Month, 1);
             var monthDayCount = DateTime.DaysInMonth(date.Year, date.Month);            
