@@ -5,17 +5,17 @@ namespace Calendar
 {
     class CalendarRepresentation : Form
     {
-        public CalendarRepresentation()
+        private readonly CalendarRender calendarRender;
+
+        public CalendarRepresentation(Calendar calendar)
         {
+            calendarRender=new CalendarRender(calendar);
             ResizeRedraw = true;
         }
 
         protected override void OnPaint(PaintEventArgs e)
         {
-            var graphics = e.Graphics;
-            var pen = new Pen(Color.Black);
-            graphics.DrawLine(pen, 0, 0, ClientSize.Width - 1, ClientSize.Height - 1);
-            graphics.DrawLine(pen, 0, ClientSize.Height - 1, ClientSize.Width - 1, 0);
+            calendarRender.Draw(e.Graphics,ClientSize);
         }
     }
 }

@@ -9,8 +9,8 @@ namespace Calendar
         static void Main(string[] args)
         {
             var date = GetFirstParameter(args);
-
-            Application.Run(new CalendarRepresentation());
+            var calendar = new Calendar(date);
+            Application.Run(new CalendarRepresentation(calendar));
         }
 
         private static string GetFirstParameter(IList<string> consoleArguments)
