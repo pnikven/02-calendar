@@ -52,6 +52,7 @@
     <Compile Include="Calendar.cs" />
     <Compile Include="CalendarRender.cs" />
     <Compile Include="CalendarTests.cs" />
+    <Compile Include="DateTimeExtentions.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="CalendarRepresentation.cs">

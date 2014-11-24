@@ -36,25 +36,21 @@ namespace Calendar
             var dayOfWeek = DayOfWeekToInt(firstDayOfMonth.DayOfWeek);
 
             var result = new List<int[]>();
-            var weekDays = CreateWeekDaysArray();
+            var weekDays = new int[DistributionByDayOfWeekMatrixWidth];
             while (dayOfMonth <= daysInMonth)
             {
                 weekDays[dayOfWeek] = dayOfMonth;
                 dayOfMonth++;
                 dayOfWeek++;
-                if (dayOfWeek <= 7) continue;
+                if (dayOfWeek <= 7) 
+                    continue;
                 result.Add(weekDays);
-                weekDays = CreateWeekDaysArray();
+                weekDays = new int[DistributionByDayOfWeekMatrixWidth];
                 dayOfWeek = 1;
             }
             if (dayOfWeek > 1)
                 result.Add(weekDays);
             return InitWeekNumbers(result, firstDayOfMonth);
-        }
-
-        private static int[] CreateWeekDaysArray()
-        {
-            return new int[DistributionByDayOfWeekMatrixWidth];
         }
 
         public static int GetWeekOfYear(int dayOfYear)
