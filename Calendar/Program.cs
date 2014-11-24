@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Calendar
 {
@@ -9,9 +10,9 @@ namespace Calendar
             var date = GetFirstParameter(args);
         }
 
-        private static string GetFirstParameter(string[] consoleArguments)
+        private static string GetFirstParameter(IList<string> consoleArguments)
         {
-            if (consoleArguments.Length != 0) return consoleArguments[0];
+            if (consoleArguments.Count != 0) return consoleArguments[0];
             throw new Exception("Date in format dd.mm.yyyy must be provided");
         }
     }
