@@ -22,7 +22,13 @@ namespace Calendar
             var firstDayOfNextMonth = firstDayOfMonth.AddMonths(1);
             var lastDayOfMonth = firstDayOfNextMonth.AddDays(-1);
             var dayOfWeek = DayOfWeekToInt(firstDayOfMonth.DayOfWeek);
+            var weekNumber = GetWeekNumber(firstDayOfMonth.DayOfYear);
 
+            throw new NotImplementedException();
+        }
+
+        public static int GetWeekNumber(int dayOfYear)
+        {
             throw new NotImplementedException();
         }
 

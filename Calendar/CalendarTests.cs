@@ -63,5 +63,17 @@ namespace Calendar
             Assert.AreEqual(expected, result);
         }
 
+        [TestCase(1, 1)]
+        [TestCase(7, 1)]
+        [TestCase(8, 2)]
+        [TestCase(14, 2)]
+        [TestCase(15, 3)]
+        public void GetWeekNumber_DayOfYear_ReturnsNumberOfWeek(int dayOfYear, int expected)
+        {
+            var result = Calendar.GetWeekNumber(dayOfYear);
+
+            Assert.AreEqual(expected, result);
+        }
+
     }
 }
