@@ -48,7 +48,7 @@ namespace Calendar
 
         public static int GetWeekNumber(int dayOfYear)
         {
-            throw new NotImplementedException();
+            return (dayOfYear-1)/7+1;
         }
 
         public static int DayOfWeekToInt(DayOfWeek dayOfWeek)
