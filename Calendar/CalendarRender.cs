@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing;
+using System.Linq;
 
 namespace Calendar
 {
@@ -25,7 +26,9 @@ namespace Calendar
             Alignment = StringAlignment.Center,
             LineAlignment = StringAlignment.Center
         };
-        private static readonly Color ForeColor = Color.FromArgb(255, 169, 169, 169);
+        private static readonly Color ForeColor = Color.FromArgb(255, 151, 151, 151);
+        private static readonly Color WeekNumberColor = Color.FromArgb(255, 0, 149, 202);
+        private static readonly Color SundayColor = Color.FromArgb(255, 255, 88, 88);
         private static readonly Brush StandardBrush = new SolidBrush(ForeColor);
 
         private readonly Calendar calendar;
@@ -49,32 +52,52 @@ namespace Calendar
         {
             if (height < 1)
                 return;
-            DrawGrid();
-            DrawCalendarHeader();
-            DrawCalendarContent();
+            DrawCalendarHeader(new PointF(0, 0));
+            DrawCalendarContent(new PointF(0, cellSize.Height * CalendarHeaderAdditionalFieldsCount));
         }
 
-        private void DrawCalendarContent()
+        private void DrawCalendarContent(PointF origin)
         {
-            DrawWeekNumbers();
-            DrawDaysOfTheWeek();
+            DrawWeekNumbers(origin);
+            DrawDaysOfTheWeek(new PointF(origin.X + cellSize.Width, origin.Y));
         }
 
-        private void DrawDaysOfTheWeek()
+        private void DrawDaysOfTheWeek(PointF origin)
         {
-            throw new NotImplementedException();
+            var p = new PointF(origin.X, origin.Y);
+            for (var i = 0; i < calendar.DistributionByDaysOfTheWeek.Length; i++, p.X = origin.X, p.Y += cellSize.Height)
+                for (var j = 1; j < calendar.DistributionByDaysOfTheWeek[i].Length; j++, p.X += cellSize.Width)
+                {
+                    var dayNumber = GetDayNumber(i, j);
+                    graphics.DrawString(dayNumber, CreateFont(dayNumber.PadLeft(2, '0'), cellSize),
+                        new SolidBrush(j % 7 == 0 ? SundayColor : ForeColor), new RectangleF(p, cellSize), AlignCenter);
+                }
         }
 
-        private void DrawWeekNumbers()
+        private string GetDayNumber(int week, int dayOfWeek)
         {
-            throw new NotImplementedException();
+            var dayNumberValue = calendar.DistributionByDaysOfTheWeek[week][dayOfWeek];
+            var dayNumber = dayNumberValue == 0 ? "" : dayNumberValue.ToString();
+            return dayNumber;
         }
 
-        private void DrawCalendarHeader()
+        private void DrawWeekNumbers(PointF origin)
         {
-            DrawCalendarCaption(new PointF(0, 0), new SizeF(width, cellSize.Height));
-            DrawWeekNumbersHeader(new PointF(0, cellSize.Height));
-            DrawDaysOfTheWeekHeader(new PointF(cellSize.Width, cellSize.Height));
+            var y = origin.Y;
+            foreach (var weekNumber in calendar.DistributionByDaysOfTheWeek.Select(week => week[0].ToString()))
+            {
+                graphics.DrawString(weekNumber, CreateFont(weekNumber.PadLeft(2, '0'), cellSize), 
+                    new SolidBrush(WeekNumberColor),
+                    new RectangleF(new PointF(origin.X, y), cellSize), AlignCenter);
+                y += cellSize.Height;
+            }
+        }
+
+        private void DrawCalendarHeader(PointF origin)
+        {
+            DrawCalendarCaption(new PointF(origin.X, origin.Y), new SizeF(width, cellSize.Height));
+            DrawWeekNumbersHeader(new PointF(origin.X, origin.Y + cellSize.Height));
+            DrawDaysOfTheWeekHeader(new PointF(origin.X + cellSize.Width, origin.Y + cellSize.Height));
         }
 
         private void DrawWeekNumbersHeader(PointF origin)
@@ -90,19 +113,10 @@ namespace Calendar
             foreach (var day in DaysOfTheWeekNames)
             {
                 var font = CreateFont(day, cellSize);
-                graphics.DrawString(day, font, StandardBrush, 
+                graphics.DrawString(day, font, StandardBrush,
                     new RectangleF(x, origin.Y, cellSize.Width, cellSize.Height), AlignCenter);
                 x += cellSize.Width;
             }
-        }
-
-        private void DrawGrid()
-        {
-            var pen = new Pen(Color.Gray);
-            for (var x = cellSize.Width; x < width; x += cellSize.Width)
-                graphics.DrawLine(pen, x, 0, x, height);
-            for (var y = cellSize.Height; y < height; y += cellSize.Height)
-                graphics.DrawLine(pen, 0, y, width, y);
         }
 
         private void DrawCalendarCaption(PointF origin, SizeF headerSize)
