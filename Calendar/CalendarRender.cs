@@ -14,22 +14,23 @@ namespace Calendar
         private readonly Graphics graphics;
         private readonly float width;
         private readonly float height;
-        private static readonly Dictionary<int, string> MonthNames = new Dictionary<int, string>()
+
+        private static readonly string[] MonthNames =
         {
-            {1, "Январь"},
-            {2, "Февраль"},
-            {3, "Март"},
-            {4, "Апрель"},
-            {5, "Май"},
-            {6, "Июнь"},
-            {7, "Июль"},
-            {8, "Август"},
-            {9, "Сентябрь"},
-            {10, "Октябрь"},
-            {11, "Ноябрь"},
-            {12, "Декабрь"}
+            "", "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"
         };
-        private static readonly Color TextColor = Color.FromArgb(255, 169, 169, 169);
+
+        private static readonly string[] DaysOfTheWeekNames =
+        {
+            "ПН","ВТ","СР", "ЧТ","ПТ","СБ","ВС",
+        };
+
+        private readonly StringFormat stringFormat = new StringFormat
+        {
+            Alignment = StringAlignment.Center,
+            LineAlignment = StringAlignment.Center
+        };
+        private static readonly Color ForeColor = Color.FromArgb(255, 169, 169, 169);
 
         public CalendarRender(Calendar calendar, Graphics graphics, Size size)
         {
@@ -41,36 +42,50 @@ namespace Calendar
 
         public void Draw()
         {
-            if (height < 1) 
+            if (height < 1)
                 return;
             var cellWidth = width / (calendar.DistributionByDaysOfTheWeek.Length + 2);
             var cellHeight = height / calendar.DistributionByDaysOfTheWeek[0].Length;
-            DrawGrid(graphics, cellWidth, cellHeight);
-            DrawCalendarHeader(graphics, new SizeF(width, cellHeight));
+            var cellSize = new SizeF(cellWidth, cellHeight);
+            DrawGrid(cellSize);
+            DrawCalendarHeader(new SizeF(width, cellHeight));
+            DrawDaysOfTheWeekHeader(new PointF(cellWidth, cellHeight), cellSize);
         }
 
-        private void DrawGrid(Graphics g, float cellWidth, float cellHeight)
+        private void DrawDaysOfTheWeekHeader(PointF origin, SizeF cellSize)
+        {
+            var x = origin.X;
+            var y = origin.Y;
+            foreach (var day in DaysOfTheWeekNames)
+            {
+                var font = CreateFont(cellSize, day);
+                var brush = new SolidBrush(ForeColor);
+                graphics.DrawString(day, font, brush, new RectangleF(x, y, cellSize.Width, cellSize.Height), stringFormat);
+                x += cellSize.Width;
+            }
+        }
+
+        private void DrawGrid(SizeF sizeF)
         {
             var pen = new Pen(Color.Gray);
-            for (var x = cellWidth; x < width; x += cellWidth)
-                g.DrawLine(pen, x, 0, x, height);
-            for (var y = cellHeight; y < height; y += cellHeight)
-                g.DrawLine(pen, 0, y, width, y);
+            for (var x = sizeF.Width; x < width; x += sizeF.Width)
+                graphics.DrawLine(pen, x, 0, x, height);
+            for (var y = sizeF.Height; y < height; y += sizeF.Height)
+                graphics.DrawLine(pen, 0, y, width, y);
         }
 
-        private void DrawCalendarHeader(Graphics g, SizeF headerSizeF)
+        private void DrawCalendarHeader(SizeF headerSizeF)
         {
             var header = CreateCalendarHeader(calendar.Date);
-            var font = CreateFont(g, headerSizeF, header);
-            var brush = new SolidBrush(TextColor);
-            var stringFormat = new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center };
-            g.DrawString(header, font, brush, new RectangleF(0, 0, width, headerSizeF.Height), stringFormat);
+            var font = CreateFont(headerSizeF, header);
+            var brush = new SolidBrush(ForeColor);
+            graphics.DrawString(header, font, brush, new RectangleF(0, 0, width, headerSizeF.Height), stringFormat);
         }
 
-        private static Font CreateFont(Graphics g, SizeF sizeF, string text)
+        private Font CreateFont(SizeF sizeF, string text)
         {
-            var font = new Font(FontName, PixelToPoint(g.DpiY, sizeF.Height));
-            var actualTextWidth = g.MeasureString(text, font).Width + TextPadding;
+            var font = new Font(FontName, PixelToPoint(graphics.DpiY, sizeF.Height));
+            var actualTextWidth = graphics.MeasureString(text, font).Width + TextPadding;
             if (actualTextWidth <= sizeF.Width)
                 return font;
             var scaleFactor = sizeF.Width / actualTextWidth;
