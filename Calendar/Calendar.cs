@@ -7,7 +7,7 @@ namespace Calendar
 {
     class Calendar
     {
-        private const int DistributionByDayOfWeekMatrixWidth = 8;
+        public const int DistributionByDayOfWeekMatrixWidth = 8;
         public DateTime Date;
         public int[][] DistributionByDaysOfTheWeek;
 
