@@ -10,6 +10,7 @@ namespace Calendar
         private const string FontName = "Times";
         private const float TextPadding = 10f;
         private const int CalendarHeaderAdditionalFieldsCount = 2;
+        private const int MinTextWidthForCalendarValues = 2;
 
         private static readonly string[] MonthNames =
         {
@@ -67,11 +68,8 @@ namespace Calendar
             var p = new PointF(origin.X, origin.Y);
             for (var i = 0; i < calendar.DistributionByDaysOfTheWeek.Length; i++, p.X = origin.X, p.Y += cellSize.Height)
                 for (var j = 1; j < calendar.DistributionByDaysOfTheWeek[i].Length; j++, p.X += cellSize.Width)
-                {
-                    var dayNumber = GetDayNumber(i, j);
-                    graphics.DrawString(dayNumber, CreateFont(dayNumber.PadLeft(2, '0'), cellSize),
-                        new SolidBrush(j % 7 == 0 ? SundayColor : ForeColor), new RectangleF(p, cellSize), AlignCenter);
-                }
+                    DrawString(GetDayNumber(i, j), MinTextWidthForCalendarValues, 
+                        j % 7 == 0 ? SundayColor : ForeColor, new RectangleF(p, cellSize));
         }
 
         private string GetDayNumber(int week, int dayOfWeek)
@@ -86,9 +84,8 @@ namespace Calendar
             var y = origin.Y;
             foreach (var weekNumber in calendar.DistributionByDaysOfTheWeek.Select(week => week[0].ToString()))
             {
-                graphics.DrawString(weekNumber, CreateFont(weekNumber.PadLeft(2, '0'), cellSize), 
-                    new SolidBrush(WeekNumberColor),
-                    new RectangleF(new PointF(origin.X, y), cellSize), AlignCenter);
+                DrawString(weekNumber, MinTextWidthForCalendarValues, 
+                    WeekNumberColor, new RectangleF(new PointF(origin.X, y), cellSize));
                 y += cellSize.Height;
             }
         }
@@ -102,9 +99,7 @@ namespace Calendar
 
         private void DrawWeekNumbersHeader(PointF origin)
         {
-            const string header = "#";
-            var font = CreateFont(header, cellSize);
-            graphics.DrawString(header, font, StandardBrush, new RectangleF(origin, cellSize), AlignCenter);
+            DrawString("#", ForeColor, new RectangleF(origin, cellSize));
         }
 
         private void DrawDaysOfTheWeekHeader(PointF origin)
@@ -112,9 +107,7 @@ namespace Calendar
             var x = origin.X;
             foreach (var day in DaysOfTheWeekNames)
             {
-                var font = CreateFont(day, cellSize);
-                graphics.DrawString(day, font, StandardBrush,
-                    new RectangleF(x, origin.Y, cellSize.Width, cellSize.Height), AlignCenter);
+                DrawString(day, ForeColor, new RectangleF(x, origin.Y, cellSize.Width, cellSize.Height));
                 x += cellSize.Width;
             }
         }
@@ -122,9 +115,7 @@ namespace Calendar
         private void DrawCalendarCaption(PointF origin, SizeF headerSize)
         {
             var header = CreateCalendarCaption(calendar.Date);
-            var font = CreateFont(header, headerSize);
-            graphics.DrawString(header, font, StandardBrush,
-                new RectangleF(origin.X, origin.Y, headerSize.Width, headerSize.Height), AlignCenter);
+            DrawString(header, ForeColor, new RectangleF(origin.X, origin.Y, headerSize.Width, headerSize.Height));
         }
 
         private Font CreateFont(string text, SizeF sizeF)
@@ -148,6 +139,18 @@ namespace Calendar
             var inchCount = pixelCount / resolution;
             var pointCount = inchCount * PointsPerInch;
             return pointCount;
+        }
+
+        private void DrawString(string text, Color color, RectangleF drawArea)
+        {
+            var font = CreateFont(text, drawArea.Size);
+            graphics.DrawString(text, font, new SolidBrush(color), drawArea, AlignCenter);
+        }
+
+        private void DrawString(string text, int minTextWidth, Color color, RectangleF drawArea)
+        {
+            var font = CreateFont(text.PadLeft(minTextWidth,'0'), drawArea.Size);
+            graphics.DrawString(text, font, new SolidBrush(color), drawArea, AlignCenter);
         }
     }
 }
