@@ -55,7 +55,7 @@ namespace Calendar
 
         private void DrawCalendarHeader()
         {
-            DrawCalendarCaption(new SizeF(width, cellSize.Height));
+            DrawCalendarCaption(new PointF(0, 0), new SizeF(width, cellSize.Height));
             DrawWeekNumberHeader(new PointF(0, cellSize.Height));
             DrawDaysOfTheWeekHeader(new PointF(cellSize.Width, cellSize.Height));
         }
@@ -70,12 +70,11 @@ namespace Calendar
         private void DrawDaysOfTheWeekHeader(PointF origin)
         {
             var x = origin.X;
-            var y = origin.Y;
             foreach (var day in DaysOfTheWeekNames)
             {
                 var font = CreateFont(day, cellSize);
                 graphics.DrawString(day, font, StandardBrush, 
-                    new RectangleF(x, y, cellSize.Width, cellSize.Height), AlignCenter);
+                    new RectangleF(x, origin.Y, cellSize.Width, cellSize.Height), AlignCenter);
                 x += cellSize.Width;
             }
         }
@@ -89,12 +88,12 @@ namespace Calendar
                 graphics.DrawLine(pen, 0, y, width, y);
         }
 
-        private void DrawCalendarCaption(SizeF headerSize)
+        private void DrawCalendarCaption(PointF origin, SizeF headerSize)
         {
             var header = CreateCalendarCaption(calendar.Date);
             var font = CreateFont(header, headerSize);
             graphics.DrawString(header, font, StandardBrush,
-                new RectangleF(0, 0, headerSize.Width, headerSize.Height), AlignCenter);
+                new RectangleF(origin.X, origin.Y, headerSize.Width, headerSize.Height), AlignCenter);
         }
 
         private Font CreateFont(string text, SizeF sizeF)
