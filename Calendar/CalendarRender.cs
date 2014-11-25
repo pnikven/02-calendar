@@ -30,28 +30,25 @@ namespace Calendar
         private static readonly Color ForeColor = Color.FromArgb(255, 151, 151, 151);
         private static readonly Color WeekNumberColor = Color.FromArgb(255, 0, 149, 202);
         private static readonly Color SundayColor = Color.FromArgb(255, 255, 88, 88);
-        private static readonly Brush StandardBrush = new SolidBrush(ForeColor);
 
         private readonly Calendar calendar;
         private readonly Graphics graphics;
-        private readonly float width;
-        private readonly float height;
+        private readonly SizeF size;
         private readonly SizeF cellSize;
 
         public CalendarRender(Calendar calendar, Graphics graphics, Size size)
         {
             this.calendar = calendar;
             this.graphics = graphics;
-            width = size.Width;
-            height = size.Height;
+            this.size = size;
             cellSize = new SizeF(
-                width / (calendar.DistributionByDaysOfTheWeek.Length + CalendarHeaderAdditionalFieldsCount),
-                height / Calendar.DistributionByDayOfWeekMatrixWidth);
+                this.size.Width / (calendar.DistributionByDaysOfTheWeek.Length + CalendarHeaderAdditionalFieldsCount),
+                this.size.Height / Calendar.DistributionByDayOfWeekMatrixWidth);
         }
 
         public void Draw()
         {
-            if (height < 1)
+            if (size.Height < 1)
                 return;
             DrawCalendarHeader(new PointF(0, 0));
             DrawCalendarContent(new PointF(0, cellSize.Height * CalendarHeaderAdditionalFieldsCount));
@@ -68,7 +65,7 @@ namespace Calendar
             var p = new PointF(origin.X, origin.Y);
             for (var i = 0; i < calendar.DistributionByDaysOfTheWeek.Length; i++, p.X = origin.X, p.Y += cellSize.Height)
                 for (var j = 1; j < calendar.DistributionByDaysOfTheWeek[i].Length; j++, p.X += cellSize.Width)
-                    DrawString(GetDayNumber(i, j), MinTextWidthForCalendarValues, 
+                    DrawString(GetDayNumber(i, j), MinTextWidthForCalendarValues,
                         j % 7 == 0 ? SundayColor : ForeColor, new RectangleF(p, cellSize));
         }
 
@@ -84,7 +81,7 @@ namespace Calendar
             var y = origin.Y;
             foreach (var weekNumber in calendar.DistributionByDaysOfTheWeek.Select(week => week[0].ToString()))
             {
-                DrawString(weekNumber, MinTextWidthForCalendarValues, 
+                DrawString(weekNumber, MinTextWidthForCalendarValues,
                     WeekNumberColor, new RectangleF(new PointF(origin.X, y), cellSize));
                 y += cellSize.Height;
             }
@@ -92,7 +89,7 @@ namespace Calendar
 
         private void DrawCalendarHeader(PointF origin)
         {
-            DrawCalendarCaption(new PointF(origin.X, origin.Y), new SizeF(width, cellSize.Height));
+            DrawCalendarCaption(new PointF(origin.X, origin.Y), new SizeF(size.Width, cellSize.Height));
             DrawWeekNumbersHeader(new PointF(origin.X, origin.Y + cellSize.Height));
             DrawDaysOfTheWeekHeader(new PointF(origin.X + cellSize.Width, origin.Y + cellSize.Height));
         }
@@ -118,7 +115,7 @@ namespace Calendar
             DrawString(header, ForeColor, new RectangleF(origin.X, origin.Y, headerSize.Width, headerSize.Height));
         }
 
-        private Font CreateFont(string text, SizeF sizeF)
+        private Font CreateFontThatFitToGivenSize(string text, SizeF sizeF)
         {
             var font = new Font(FontName, PixelToPoint(graphics.DpiY, sizeF.Height));
             var actualTextWidth = graphics.MeasureString(text, font).Width + TextPadding;
@@ -143,13 +140,13 @@ namespace Calendar
 
         private void DrawString(string text, Color color, RectangleF drawArea)
         {
-            var font = CreateFont(text, drawArea.Size);
+            var font = CreateFontThatFitToGivenSize(text, drawArea.Size);
             graphics.DrawString(text, font, new SolidBrush(color), drawArea, AlignCenter);
         }
 
         private void DrawString(string text, int minTextWidth, Color color, RectangleF drawArea)
         {
-            var font = CreateFont(text.PadLeft(minTextWidth,'0'), drawArea.Size);
+            var font = CreateFontThatFitToGivenSize(text.PadLeft(minTextWidth, '0'), drawArea.Size);
             graphics.DrawString(text, font, new SolidBrush(color), drawArea, AlignCenter);
         }
     }
