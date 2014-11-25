@@ -7,11 +7,13 @@ namespace Calendar
     class CalendarRender
     {
         private const float PointsPerInch = 72;
+        private const string FontName = "Arial";
+        private const float TextPadding = 10f;
 
         private readonly Calendar calendar;
-        private float width;
-        private float height;
-
+        private readonly Graphics graphics;
+        private readonly float width;
+        private readonly float height;
         private static readonly Dictionary<int, string> MonthNames = new Dictionary<int, string>()
         {
             {1, "Январь"},
@@ -27,45 +29,53 @@ namespace Calendar
             {11, "Ноябрь"},
             {12, "Декабрь"}
         };
+        private static readonly Color TextColor = Color.FromArgb(255, 169, 169, 169);
 
-        public CalendarRender(Calendar calendar)
+        public CalendarRender(Calendar calendar, Graphics graphics, Size size)
         {
             this.calendar = calendar;
-        }
-
-        public void Draw(Graphics g, Size size)
-        {
+            this.graphics = graphics;
             width = size.Width;
             height = size.Height;
-            if (height < 1) return;
+        }
 
-            var cellWidth = (float)width / (calendar.DistributionByDaysOfTheWeek.Length + 2);
-            var cellHeight = (float)height / calendar.DistributionByDaysOfTheWeek[0].Length;
-
-            DrawGrid(g, cellWidth, cellHeight);
-            DrawCalendarHeader(g, cellHeight);
+        public void Draw()
+        {
+            if (height < 1) 
+                return;
+            var cellWidth = width / (calendar.DistributionByDaysOfTheWeek.Length + 2);
+            var cellHeight = height / calendar.DistributionByDaysOfTheWeek[0].Length;
+            DrawGrid(graphics, cellWidth, cellHeight);
+            DrawCalendarHeader(graphics, new SizeF(width, cellHeight));
         }
 
         private void DrawGrid(Graphics g, float cellWidth, float cellHeight)
         {
             var pen = new Pen(Color.Gray);
             for (var x = cellWidth; x < width; x += cellWidth)
-            {
                 g.DrawLine(pen, x, 0, x, height);
-            }
             for (var y = cellHeight; y < height; y += cellHeight)
-            {
                 g.DrawLine(pen, 0, y, width, y);
-            }
         }
 
-        private void DrawCalendarHeader(Graphics g, float cellHeight)
+        private void DrawCalendarHeader(Graphics g, SizeF headerSizeF)
         {
-            var stringFormat = new StringFormat { Alignment = StringAlignment.Center };
-            var font = new Font("Arial", PixelToPoint(g.DpiY, cellHeight));
             var header = CreateCalendarHeader(calendar.Date);
-            var brush = new SolidBrush(Color.Black);
-            g.DrawString(header, font, brush, new RectangleF(0, 0, width, cellHeight), stringFormat);
+            var font = CreateFont(g, headerSizeF, header);
+            var brush = new SolidBrush(TextColor);
+            var stringFormat = new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center };
+            g.DrawString(header, font, brush, new RectangleF(0, 0, width, headerSizeF.Height), stringFormat);
+        }
+
+        private static Font CreateFont(Graphics g, SizeF sizeF, string text)
+        {
+            var font = new Font(FontName, PixelToPoint(g.DpiY, sizeF.Height));
+            var actualTextWidth = g.MeasureString(text, font).Width + TextPadding;
+            if (actualTextWidth <= sizeF.Width)
+                return font;
+            var scaleFactor = sizeF.Width / actualTextWidth;
+            font = new Font(FontName, font.SizeInPoints * scaleFactor);
+            return font;
         }
 
         private static string CreateCalendarHeader(DateTime date)

@@ -5,24 +5,19 @@ namespace Calendar
 {
     class CalendarRepresentation : Form
     {
-        private readonly CalendarRender calendarRender;
+        private readonly Calendar calendar;
 
         public CalendarRepresentation(Calendar calendar)
         {
-            calendarRender=new CalendarRender(calendar);
+            this.calendar = calendar;
             BackColor = Color.FromArgb(255, 242, 242, 242); 
             ResizeRedraw = true;
         }
 
-        public override sealed Color BackColor
-        {
-            get { return base.BackColor; }
-            set { base.BackColor = value; }
-        }
-
         protected override void OnPaint(PaintEventArgs e)
         {
-            calendarRender.Draw(e.Graphics,ClientSize);
+            var calendarRender = new CalendarRender(calendar, e.Graphics, ClientSize);
+            calendarRender.Draw();
         }
     }
 }
