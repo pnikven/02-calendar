@@ -1,5 +1,4 @@
-﻿using System;
-using System.Drawing;
+﻿using System.Drawing;
 using System.Linq;
 
 namespace Calendar
@@ -9,7 +8,7 @@ namespace Calendar
         private const float PointsPerInch = 72;
         private const string FontName = "Times";
         private const float TextPadding = 10f;
-        private const int CalendarHeaderAdditionalFieldsCount = 2;
+        private const int CalendarHeaderFieldsCount = 2;
         private const int MinTextWidthForCalendarValues = 2;
 
         private static readonly string[] MonthNames =
@@ -43,7 +42,7 @@ namespace Calendar
             this.graphics = graphics;
             this.size = size;
             cellSize = new SizeF(
-                this.size.Width / (calendar.DistributionByDaysOfTheWeek.Length + CalendarHeaderAdditionalFieldsCount),
+                this.size.Width / (calendar.DistributionByDaysOfTheWeek.Length + CalendarHeaderFieldsCount),
                 this.size.Height / Calendar.DistributionByDayOfWeekMatrixWidth);
         }
 
@@ -52,30 +51,48 @@ namespace Calendar
             if (size.Height < 1)
                 return;
             DrawCalendarHeader(new PointF(0, 0));
-            DrawCalendarContent(new PointF(0, cellSize.Height * CalendarHeaderAdditionalFieldsCount));
+            DrawCalendarContent(new PointF(0, cellSize.Height * CalendarHeaderFieldsCount));
+        }
+
+        private void DrawCalendarHeader(PointF origin)
+        {
+            var header = MonthNames[calendar.Date.Month] + " " + calendar.Date.Year;
+            DrawString(header, ForeColor, new RectangleF(origin, new SizeF(size.Width, cellSize.Height)));
+            DrawString("#", ForeColor, new RectangleF(new PointF(origin.X, origin.Y + cellSize.Height), cellSize));
+            DrawDaysOfTheWeekHeader(new PointF(origin.X + cellSize.Width, origin.Y + cellSize.Height));
+        }
+
+        private void DrawDaysOfTheWeekHeader(PointF origin)
+        {
+            var x = origin.X;
+            for (var i = 0; i < DaysOfTheWeekNames.Length; i++, x += cellSize.Width)
+                DrawString(DaysOfTheWeekNames[i], ForeColor, new RectangleF(x, origin.Y, cellSize.Width, cellSize.Height));
         }
 
         private void DrawCalendarContent(PointF origin)
         {
             DrawWeekNumbers(origin);
-            DrawDateBackground();
+            graphics.FillEllipse(new SolidBrush(DateBackColor),
+                new RectangleF(GetDateLocation(), cellSize));
             DrawDaysOfTheWeek(new PointF(origin.X + cellSize.Width, origin.Y));
         }
 
-        private void DrawDateBackground()
+        private void DrawWeekNumbers(PointF origin)
         {
-            graphics.FillEllipse(new SolidBrush(DateBackColor),
-                new RectangleF(GetDateLocation(), cellSize));
+            var y = origin.Y;
+            foreach (var weekNumber in calendar.DistributionByDaysOfTheWeek.Select(week => week[0].ToString()))
+            {
+                DrawString(weekNumber, MinTextWidthForCalendarValues, FontStyle.Italic,
+                    WeekNumberColor, new RectangleF(new PointF(origin.X, y), cellSize));
+                y += cellSize.Height;
+            }
         }
 
         private PointF GetDateLocation()
         {
-            for (var i = 0; i < calendar.DistributionByDaysOfTheWeek.Length; i++)
-                for (var j = 1; j < calendar.DistributionByDaysOfTheWeek[i].Length; j++)
-                    if (calendar.DistributionByDaysOfTheWeek[i][j] == calendar.Date.Day)
-                        return
-                            new PointF(j * cellSize.Width, (i + CalendarHeaderAdditionalFieldsCount) * cellSize.Height);
-            throw new Exception("Date not found in Calendar Matrix");
+            return
+                new PointF(calendar.DayLocation.Item2 * cellSize.Width,
+                    (calendar.DayLocation.Item1 + CalendarHeaderFieldsCount) * cellSize.Height);
         }
 
         private void DrawDaysOfTheWeek(PointF origin)
@@ -94,45 +111,6 @@ namespace Calendar
             return dayNumber;
         }
 
-        private void DrawWeekNumbers(PointF origin)
-        {
-            var y = origin.Y;
-            foreach (var weekNumber in calendar.DistributionByDaysOfTheWeek.Select(week => week[0].ToString()))
-            {
-                DrawString(weekNumber, MinTextWidthForCalendarValues, FontStyle.Italic, 
-                    WeekNumberColor, new RectangleF(new PointF(origin.X, y), cellSize));
-                y += cellSize.Height;
-            }
-        }
-
-        private void DrawCalendarHeader(PointF origin)
-        {
-            DrawCalendarCaption(new PointF(origin.X, origin.Y), new SizeF(size.Width, cellSize.Height));
-            DrawWeekNumbersHeader(new PointF(origin.X, origin.Y + cellSize.Height));
-            DrawDaysOfTheWeekHeader(new PointF(origin.X + cellSize.Width, origin.Y + cellSize.Height));
-        }
-
-        private void DrawWeekNumbersHeader(PointF origin)
-        {
-            DrawString("#", ForeColor, new RectangleF(origin, cellSize));
-        }
-
-        private void DrawDaysOfTheWeekHeader(PointF origin)
-        {
-            var x = origin.X;
-            foreach (var day in DaysOfTheWeekNames)
-            {
-                DrawString(day, ForeColor, new RectangleF(x, origin.Y, cellSize.Width, cellSize.Height));
-                x += cellSize.Width;
-            }
-        }
-
-        private void DrawCalendarCaption(PointF origin, SizeF headerSize)
-        {
-            var header = CreateCalendarCaption(calendar.Date);
-            DrawString(header, ForeColor, new RectangleF(origin.X, origin.Y, headerSize.Width, headerSize.Height));
-        }
-
         private Font CreateFontThatFitToGivenSize(string text, SizeF sizeF, FontStyle fontStyle)
         {
             var font = new Font(FontName, PixelToPoint(graphics.DpiY, sizeF.Height), fontStyle);
@@ -142,11 +120,6 @@ namespace Calendar
             var scaleFactor = sizeF.Width / actualTextWidth;
             font = new Font(FontName, font.SizeInPoints * scaleFactor, fontStyle);
             return font;
-        }
-
-        private static string CreateCalendarCaption(DateTime date)
-        {
-            return MonthNames[date.Month] + " " + date.Year;
         }
 
         private static float PixelToPoint(float resolution, float pixelCount)

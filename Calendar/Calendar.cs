@@ -10,6 +10,7 @@ namespace Calendar
         public const int DistributionByDayOfWeekMatrixWidth = 8;
         public DateTime Date;
         public int[][] DistributionByDaysOfTheWeek;
+        public Tuple<int, int> DayLocation;
 
         public Calendar(string date)
         {
@@ -17,16 +18,17 @@ namespace Calendar
             Date = DateTime.Parse(date, culture);
             var distribution = DistributeByDaysOfTheWeek(Date);
             DistributionByDaysOfTheWeek = InitWeekNumbers(distribution, Date);
+            DayLocation = GetDayLocation(Date.Day);
         }
 
         public static List<int[]> DistributeByDaysOfTheWeek(DateTime date)
         {
             var daysInMonth = DateTime.DaysInMonth(date.Year, date.Month);
-            var dayOfWeek = DayOfWeekToInt(date.FirstDayOfMonth().DayOfWeek);
+            var dayOfWeek = date.FirstDayOfMonth().DayOfWeek();
             var result = new List<int[]>();
             for (var dayOfMonth = 1; dayOfMonth <= daysInMonth; dayOfMonth++, dayOfWeek = dayOfWeek % 7 + 1)
             {
-                if (result.Count==0 || dayOfWeek == 1)
+                if (result.Count == 0 || dayOfWeek == 1)
                     result.Add(new int[DistributionByDayOfWeekMatrixWidth]);
                 result.Last()[dayOfWeek] = dayOfMonth;
             }
@@ -43,15 +45,18 @@ namespace Calendar
             return arrayOfWeeks.ToArray();
         }
 
+        private Tuple<int, int> GetDayLocation(int day)
+        {
+            for (var i = 0; i < DistributionByDaysOfTheWeek.Length; i++)
+                for (var j = 1; j < DistributionByDaysOfTheWeek[i].Length; j++)
+                    if (DistributionByDaysOfTheWeek[i][j] == day)
+                        return Tuple.Create(i, j);
+            throw new Exception("Date not found in DistributionByDaysOfTheWeek Matrix");
+        }
+
         public static int GetWeekOfYear(int dayOfYear)
         {
             return (dayOfYear - 1) / 7 + 1;
-        }
-
-        public static int DayOfWeekToInt(DayOfWeek dayOfWeek)
-        {
-            var intRepresentation = (int)dayOfWeek;
-            return intRepresentation == 0 ? 7 : intRepresentation;
         }
     }
 }

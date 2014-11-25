@@ -149,20 +149,6 @@ namespace Calendar
             Assert.AreEqual(expected,result);
         }
 
-        [TestCase(DayOfWeek.Monday, 1)]
-        [TestCase(DayOfWeek.Tuesday, 2)]
-        [TestCase(DayOfWeek.Wednesday, 3)]
-        [TestCase(DayOfWeek.Thursday, 4)]
-        [TestCase(DayOfWeek.Friday, 5)]
-        [TestCase(DayOfWeek.Saturday, 6)]
-        [TestCase(DayOfWeek.Sunday, 7)]
-        public void DayOfWeekToInt_DayOfWeek_ConvertsToIntWhereMondayIsTheFirstDayOfWeek(DayOfWeek input, int expected)
-        {
-            var result = Calendar.DayOfWeekToInt(input);
-
-            Assert.AreEqual(expected, result);
-        }
-
         [TestCase(1, 1)]
         [TestCase(7, 1)]
         [TestCase(8, 2)]
