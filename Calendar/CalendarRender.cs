@@ -25,12 +25,13 @@ namespace Calendar
             "ПН","ВТ","СР", "ЧТ","ПТ","СБ","ВС",
         };
 
-        private readonly StringFormat stringFormat = new StringFormat
+        private readonly StringFormat alignCenter = new StringFormat
         {
             Alignment = StringAlignment.Center,
             LineAlignment = StringAlignment.Center
         };
         private static readonly Color ForeColor = Color.FromArgb(255, 169, 169, 169);
+        private static readonly Brush StandardBrush = new SolidBrush(ForeColor);
 
         public CalendarRender(Calendar calendar, Graphics graphics, Size size)
         {
@@ -49,7 +50,15 @@ namespace Calendar
             var cellSize = new SizeF(cellWidth, cellHeight);
             DrawGrid(cellSize);
             DrawCalendarHeader(new SizeF(width, cellHeight));
+            DrawWeekNumberHeader(new PointF(0, cellHeight), cellSize);
             DrawDaysOfTheWeekHeader(new PointF(cellWidth, cellHeight), cellSize);
+        }
+
+        private void DrawWeekNumberHeader(PointF origin, SizeF cellSize)
+        {
+            var header = "#";
+            var font = CreateFont(cellSize, header);
+            graphics.DrawString(header, font, StandardBrush, new RectangleF(origin, cellSize), alignCenter);
         }
 
         private void DrawDaysOfTheWeekHeader(PointF origin, SizeF cellSize)
@@ -59,8 +68,8 @@ namespace Calendar
             foreach (var day in DaysOfTheWeekNames)
             {
                 var font = CreateFont(cellSize, day);
-                var brush = new SolidBrush(ForeColor);
-                graphics.DrawString(day, font, brush, new RectangleF(x, y, cellSize.Width, cellSize.Height), stringFormat);
+                graphics.DrawString(day, font, StandardBrush, 
+                    new RectangleF(x, y, cellSize.Width, cellSize.Height), alignCenter);
                 x += cellSize.Width;
             }
         }
@@ -78,8 +87,8 @@ namespace Calendar
         {
             var header = CreateCalendarHeader(calendar.Date);
             var font = CreateFont(headerSizeF, header);
-            var brush = new SolidBrush(ForeColor);
-            graphics.DrawString(header, font, brush, new RectangleF(0, 0, width, headerSizeF.Height), stringFormat);
+            graphics.DrawString(header, font, StandardBrush, 
+                new RectangleF(0, 0, width, headerSizeF.Height), alignCenter);
         }
 
         private Font CreateFont(SizeF sizeF, string text)
