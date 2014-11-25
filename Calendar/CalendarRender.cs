@@ -19,7 +19,7 @@ namespace Calendar
 
         private static readonly string[] DaysOfTheWeekNames =
         {
-            "ПН","ВТ","СР", "ЧТ","ПТ","СБ","ВС",
+            "ПН","ВТ","СР", "ЧТ","ПТ","СБ","ВС"
         };
 
         private static readonly StringFormat AlignCenter = new StringFormat
@@ -30,6 +30,7 @@ namespace Calendar
         private static readonly Color ForeColor = Color.FromArgb(255, 151, 151, 151);
         private static readonly Color WeekNumberColor = Color.FromArgb(255, 0, 149, 202);
         private static readonly Color SundayColor = Color.FromArgb(255, 255, 88, 88);
+        private static readonly Color DateBackColor = Color.FromArgb(255, 185, 185, 245);
 
         private readonly Calendar calendar;
         private readonly Graphics graphics;
@@ -57,7 +58,24 @@ namespace Calendar
         private void DrawCalendarContent(PointF origin)
         {
             DrawWeekNumbers(origin);
+            DrawDateBackground();
             DrawDaysOfTheWeek(new PointF(origin.X + cellSize.Width, origin.Y));
+        }
+
+        private void DrawDateBackground()
+        {
+            graphics.FillEllipse(new SolidBrush(DateBackColor),
+                new RectangleF(GetDateLocation(), cellSize));
+        }
+
+        private PointF GetDateLocation()
+        {
+            for (var i = 0; i < calendar.DistributionByDaysOfTheWeek.Length; i++)
+                for (var j = 1; j < calendar.DistributionByDaysOfTheWeek[i].Length; j++)
+                    if (calendar.DistributionByDaysOfTheWeek[i][j] == calendar.Date.Day)
+                        return
+                            new PointF(j * cellSize.Width, (i + CalendarHeaderAdditionalFieldsCount) * cellSize.Height);
+            throw new Exception("Date not found in Calendar Matrix");
         }
 
         private void DrawDaysOfTheWeek(PointF origin)
