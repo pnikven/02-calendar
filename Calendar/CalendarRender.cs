@@ -99,7 +99,7 @@ namespace Calendar
             var y = origin.Y;
             foreach (var weekNumber in calendar.DistributionByDaysOfTheWeek.Select(week => week[0].ToString()))
             {
-                DrawString(weekNumber, MinTextWidthForCalendarValues,
+                DrawString(weekNumber, MinTextWidthForCalendarValues, FontStyle.Italic, 
                     WeekNumberColor, new RectangleF(new PointF(origin.X, y), cellSize));
                 y += cellSize.Height;
             }
@@ -133,14 +133,14 @@ namespace Calendar
             DrawString(header, ForeColor, new RectangleF(origin.X, origin.Y, headerSize.Width, headerSize.Height));
         }
 
-        private Font CreateFontThatFitToGivenSize(string text, SizeF sizeF)
+        private Font CreateFontThatFitToGivenSize(string text, SizeF sizeF, FontStyle fontStyle)
         {
-            var font = new Font(FontName, PixelToPoint(graphics.DpiY, sizeF.Height));
+            var font = new Font(FontName, PixelToPoint(graphics.DpiY, sizeF.Height), fontStyle);
             var actualTextWidth = graphics.MeasureString(text, font).Width + TextPadding;
             if (actualTextWidth <= sizeF.Width)
                 return font;
             var scaleFactor = sizeF.Width / actualTextWidth;
-            font = new Font(FontName, font.SizeInPoints * scaleFactor);
+            font = new Font(FontName, font.SizeInPoints * scaleFactor, fontStyle);
             return font;
         }
 
@@ -158,13 +158,19 @@ namespace Calendar
 
         private void DrawString(string text, Color color, RectangleF drawArea)
         {
-            var font = CreateFontThatFitToGivenSize(text, drawArea.Size);
+            var font = CreateFontThatFitToGivenSize(text, drawArea.Size, FontStyle.Regular);
             graphics.DrawString(text, font, new SolidBrush(color), drawArea, AlignCenter);
         }
 
         private void DrawString(string text, int minTextWidth, Color color, RectangleF drawArea)
         {
-            var font = CreateFontThatFitToGivenSize(text.PadLeft(minTextWidth, '0'), drawArea.Size);
+            var font = CreateFontThatFitToGivenSize(text.PadLeft(minTextWidth, '0'), drawArea.Size, FontStyle.Regular);
+            graphics.DrawString(text, font, new SolidBrush(color), drawArea, AlignCenter);
+        }
+
+        private void DrawString(string text, int minTextWidth, FontStyle style, Color color, RectangleF drawArea)
+        {
+            var font = CreateFontThatFitToGivenSize(text.PadLeft(minTextWidth, '0'), drawArea.Size, style);
             graphics.DrawString(text, font, new SolidBrush(color), drawArea, AlignCenter);
         }
     }
