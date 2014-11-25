@@ -51,16 +51,33 @@ namespace Calendar
                 return;
             DrawGrid();
             DrawCalendarHeader();
+            DrawCalendarContent();
+        }
+
+        private void DrawCalendarContent()
+        {
+            DrawWeekNumbers();
+            DrawDaysOfTheWeek();
+        }
+
+        private void DrawDaysOfTheWeek()
+        {
+            throw new NotImplementedException();
+        }
+
+        private void DrawWeekNumbers()
+        {
+            throw new NotImplementedException();
         }
 
         private void DrawCalendarHeader()
         {
             DrawCalendarCaption(new PointF(0, 0), new SizeF(width, cellSize.Height));
-            DrawWeekNumberHeader(new PointF(0, cellSize.Height));
+            DrawWeekNumbersHeader(new PointF(0, cellSize.Height));
             DrawDaysOfTheWeekHeader(new PointF(cellSize.Width, cellSize.Height));
         }
 
-        private void DrawWeekNumberHeader(PointF origin)
+        private void DrawWeekNumbersHeader(PointF origin)
         {
             const string header = "#";
             var font = CreateFont(header, cellSize);
