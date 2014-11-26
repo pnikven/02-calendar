@@ -8,7 +8,7 @@ namespace Calendar
         private const float PointsPerInch = 72;
         private const string FontName = "Times";
         private const float TextPadding = 10f;
-        private const int CalendarHeaderFieldsCount = 2;
+        private const int CalendarHeaderFieldsCount = 3;
         private const int MinTextWidthForCalendarValues = 2;
 
         private static readonly string[] MonthNames =
@@ -43,8 +43,8 @@ namespace Calendar
             this.graphics = graphics;
             this.size = size;
             cellSize = new SizeF(
-                this.size.Width / (calendar.DistributionByDaysOfTheWeek.Length + CalendarHeaderFieldsCount),
-                this.size.Height / Calendar.DistributionByDayOfWeekMatrixWidth);
+                this.size.Width / Calendar.DistributionByDayOfWeekMatrixWidth,
+                this.size.Height / (calendar.DistributionByDaysOfTheWeek.Length + CalendarHeaderFieldsCount));
         }
 
         public void Draw()
