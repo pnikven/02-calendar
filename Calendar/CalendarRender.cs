@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using System;
+using System.Drawing;
 using System.Linq;
 
 namespace Calendar
@@ -13,7 +14,8 @@ namespace Calendar
 
         private static readonly string[] MonthNames =
         {
-            "", "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь", "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"
+            "", "Января", "Февраля", "Марта", "Апреля", "Мая", "Июня", 
+            "Июля", "Августа", "Сентября", "Октября", "Ноября", "Декабря"
         };
 
         private static readonly string[] DaysOfTheWeekNames =
@@ -26,7 +28,7 @@ namespace Calendar
             Alignment = StringAlignment.Center,
             LineAlignment = StringAlignment.Center
         };
-        private static readonly Color BackColor = Color.FromArgb(255, 242, 242, 242); 
+        private static readonly Color BackColor = Color.FromArgb(255, 242, 242, 242);
         private static readonly Color ForeColor = Color.FromArgb(255, 151, 151, 151);
         private static readonly Color WeekNumberColor = Color.FromArgb(255, 0, 149, 202);
         private static readonly Color SundayColor = Color.FromArgb(255, 255, 88, 88);
@@ -63,7 +65,8 @@ namespace Calendar
 
         private void DrawCalendarHeader(PointF origin)
         {
-            var header = MonthNames[calendar.Date.Month] + " " + calendar.Date.Year;
+            var header = String.Format("{0} {1} {2} г.",
+                calendar.Date.Day,MonthNames[calendar.Date.Month],calendar.Date.Year);
             DrawString(header, ForeColor, new RectangleF(origin, new SizeF(size.Width, cellSize.Height)));
             DrawString("#", ForeColor, new RectangleF(new PointF(origin.X, origin.Y + cellSize.Height * 2), cellSize));
             DrawDaysOfTheWeekHeader(new PointF(origin.X + cellSize.Width, origin.Y + cellSize.Height * 2));
