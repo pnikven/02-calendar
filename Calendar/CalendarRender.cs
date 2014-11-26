@@ -65,8 +65,8 @@ namespace Calendar
         {
             var header = MonthNames[calendar.Date.Month] + " " + calendar.Date.Year;
             DrawString(header, ForeColor, new RectangleF(origin, new SizeF(size.Width, cellSize.Height)));
-            DrawString("#", ForeColor, new RectangleF(new PointF(origin.X, origin.Y + cellSize.Height), cellSize));
-            DrawDaysOfTheWeekHeader(new PointF(origin.X + cellSize.Width, origin.Y + cellSize.Height));
+            DrawString("#", ForeColor, new RectangleF(new PointF(origin.X, origin.Y + cellSize.Height * 2), cellSize));
+            DrawDaysOfTheWeekHeader(new PointF(origin.X + cellSize.Width, origin.Y + cellSize.Height * 2));
         }
 
         private void DrawDaysOfTheWeekHeader(PointF origin)
