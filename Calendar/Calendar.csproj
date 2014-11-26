@@ -56,6 +56,8 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="CalendarGenerator.cs" />
+    <Compile Include="ZodiacalSign.cs" />
+    <Compile Include="ZodiacalSignTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
