@@ -26,6 +26,7 @@ namespace Calendar
             Alignment = StringAlignment.Center,
             LineAlignment = StringAlignment.Center
         };
+        private static readonly Color BackColor = Color.FromArgb(255, 242, 242, 242); 
         private static readonly Color ForeColor = Color.FromArgb(255, 151, 151, 151);
         private static readonly Color WeekNumberColor = Color.FromArgb(255, 0, 149, 202);
         private static readonly Color SundayColor = Color.FromArgb(255, 255, 88, 88);
@@ -48,10 +49,16 @@ namespace Calendar
 
         public void Draw()
         {
-            if (size.Height < 1)
+            if (size.Width < 1 || size.Height < 1)
                 return;
+            DrawCalendarBackground(new RectangleF(new PointF(0, 0), size));
             DrawCalendarHeader(new PointF(0, 0));
             DrawCalendarContent(new PointF(0, cellSize.Height * CalendarHeaderFieldsCount));
+        }
+
+        private void DrawCalendarBackground(RectangleF calendarArea)
+        {
+            graphics.FillRectangle(new SolidBrush(BackColor), calendarArea);
         }
 
         private void DrawCalendarHeader(PointF origin)

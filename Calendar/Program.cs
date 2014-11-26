@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Windows.Forms;
+using System.Drawing;
 
 namespace Calendar
 {
@@ -10,7 +10,8 @@ namespace Calendar
         {
             var date = GetFirstParameter(args);
             var calendar = new Calendar(date);
-            Application.Run(new CalendarRepresentation(calendar));
+            var outputCalendarImageFilename = String.Format("Calendar for {0}.bmp",calendar.Date.ToShortDateString());
+            CalendarGenerator.GenerateCalendarImage(calendar, new Size(300, 300), outputCalendarImageFilename);
         }
 
         private static string GetFirstParameter(IList<string> consoleArguments)
