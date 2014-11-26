@@ -38,6 +38,7 @@ namespace Calendar
         private readonly Graphics graphics;
         private readonly SizeF size;
         private readonly SizeF cellSize;
+        private readonly SizeF rowSize;
 
         public CalendarRender(Calendar calendar, Graphics graphics, Size size)
         {
@@ -47,6 +48,7 @@ namespace Calendar
             cellSize = new SizeF(
                 this.size.Width / Calendar.DistributionByDayOfWeekMatrixWidth,
                 this.size.Height / (calendar.DistributionByDaysOfTheWeek.Length + CalendarHeaderFieldsCount));
+            rowSize = new SizeF(size.Width, cellSize.Height);
         }
 
         public void Draw()
@@ -66,10 +68,17 @@ namespace Calendar
         private void DrawCalendarHeader(PointF origin)
         {
             var header = String.Format("{0} {1} {2} г.",
-                calendar.Date.Day,MonthNames[calendar.Date.Month],calendar.Date.Year);
-            DrawString(header, ForeColor, new RectangleF(origin, new SizeF(size.Width, cellSize.Height)));
+                calendar.Date.Day, MonthNames[calendar.Date.Month], calendar.Date.Year);
+            DrawString(header, ForeColor, new RectangleF(origin, rowSize));
+            DrawZodiacalSign(new PointF(origin.X, origin.Y + cellSize.Height));
             DrawString("#", ForeColor, new RectangleF(new PointF(origin.X, origin.Y + cellSize.Height * 2), cellSize));
             DrawDaysOfTheWeekHeader(new PointF(origin.X + cellSize.Width, origin.Y + cellSize.Height * 2));
+        }
+
+        private void DrawZodiacalSign(PointF origin)
+        {
+            var zodiacalSign = String.Format("Знак Зодиака: {0}", ZodiacalSign.GetZodiacalSign(calendar.Date));
+            DrawString(zodiacalSign, ForeColor, new RectangleF(origin, rowSize));
         }
 
         private void DrawDaysOfTheWeekHeader(PointF origin)
