@@ -73,15 +73,8 @@ namespace Calendar
             var header = String.Format("{0} {1} {2} г.",
                 calendarPage.Date.Day, MonthNames[calendarPage.Date.Month], calendarPage.Date.Year);
             DrawString(header, ForeColor, new RectangleF(origin, rowSize));
-            DrawZodiacalSign(new PointF(origin.X, origin.Y + cellSize.Height));
             DrawString("#", ForeColor, new RectangleF(new PointF(origin.X, origin.Y + cellSize.Height * 2), cellSize));
             DrawDaysOfTheWeekHeader(new PointF(origin.X + cellSize.Width, origin.Y + cellSize.Height * 2));
-        }
-
-        private void DrawZodiacalSign(PointF origin)
-        {
-            var zodiacalSign = String.Format("Знак Зодиака: {0}", ZodiacalSign.GetZodiacalSign(calendarPage.Date));
-            DrawString(zodiacalSign, ForeColor, new RectangleF(origin, rowSize));
         }
 
         private void DrawDaysOfTheWeekHeader(PointF origin)
