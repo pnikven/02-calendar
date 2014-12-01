@@ -8,11 +8,26 @@ namespace Calendar
     {
         private readonly string inputDate;
 
+        private IPageDataFactory _pageDataFactory;
+        private IPageRender _pageRender;
+
+        private void SetPageRander(IPageRender pageRender)
+        {
+            _pageRender = pageRender;
+        }
+
+        private void SetPageDataFactory(IPageDataFactory pageDataFactory)
+        {
+            _pageDataFactory = pageDataFactory;
+        }
+
         static void Main(string[] args)
         {
             try
             {
                 var program = new Program(args);
+                program.SetPageDataFactory(new CalendarPageDataFactory());
+                program.SetPageRander(new SimplePageRender());
                 program.Start();
             }
             catch (Exception e)
@@ -33,13 +48,12 @@ namespace Calendar
             var culture = new CultureInfo("ru-RU");
             var date = DateTime.Parse(inputDate, culture);
 
-            var calendarPage = new CalendarPage(date);
-            var calendarRender = new CalendarPageRender(calendarPage);
-            Bitmap calendarPageImage = calendarRender.Draw();
+            PageElement page = _pageDataFactory.Create(date);
+            Bitmap pageImage = _pageRender.Draw(page);
 
-            var outputCalendarPageImageFilename = String.Format("CalendarPage for {0}.{1}.{2}.bmp",
+            var outputPageImageFilename = String.Format("Calendar Page for {0}.{1}.{2}.bmp",
                 date.Day, date.Month, date.Year);
-            calendarPageImage.Save(outputCalendarPageImageFilename);
+            pageImage.Save(outputPageImageFilename);
         }
     }
 }

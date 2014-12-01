@@ -49,10 +49,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CalendarPage.cs" />
-    <Compile Include="CalendarPageRender.cs" />
-    <Compile Include="CalendarTests.cs" />
+    <Compile Include="CalendarPageDataFactory.cs" />
+    <Compile Include="IPageDataFactory.cs" />
+    <Compile Include="IPageRender.cs" />
+    <Compile Include="SimplePageRender.cs" />
+    <Compile Include="CalendarPageDataTests.cs" />
     <Compile Include="DateTimeExtentions.cs" />
+    <Compile Include="PageElement.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
