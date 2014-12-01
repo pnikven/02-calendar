@@ -7,31 +7,6 @@ namespace Calendar
     [TestFixture]
     class CalendarTests
     {
-        [Test]
-        public void Calendar_StringWithIncorrectDate_ThrowsFormatException()
-        {
-            Assert.Throws<FormatException>(() => new Calendar("incorrect date"));
-        }
-
-        [Test]
-        public void Calendar_OnNull_ThrowsArgumentNullException()
-        {
-            Assert.Throws<ArgumentNullException>(() => new Calendar(null));
-        }
-
-        [TestCase("24.11.2014", 24, 11, 2014)]
-        [TestCase("04.01.2010", 4, 1, 2010)]
-        [TestCase("4.1.10", 4, 1, 2010)]
-        [TestCase("1.1.0001", 1, 1, 1)]
-        [TestCase("1.01.1", 1, 1, 2001)]
-        public void Calendar_DateInRussianCultureFormat_CreatesAppropriateDateTimeInstance(
-            string date, int expectedDay, int expectedMonth, int expectedYear)
-        {
-            var result = new Calendar(date).Date;
-
-            Assert.AreEqual(new DateTime(expectedYear, expectedMonth, expectedDay), result);
-        }
-
         private static readonly object[] DistributeByDaysOfTheWeekCases =
         {
             new object[]
@@ -134,7 +109,7 @@ namespace Calendar
         {
             var date = new DateTime(year, month, day);
 
-            var result = Calendar.DistributeByDaysOfTheWeek(date);
+            var result = Calendar.CalendarPage.DistributeByDaysOfTheWeek(date);
 
             Assert.AreEqual(expectedDistribution, result);
         }
@@ -144,7 +119,7 @@ namespace Calendar
             InitWeekNumbers_OnDateAndDistributionOfDaysOfTheWeek_ReturnsThisDistributionWithWeekNumbersInitialized(
                 int day, int month, int year, int[][] inputDistribution, int[][] expected)
         {
-            var result = Calendar.InitWeekNumbers(inputDistribution.ToList(), new DateTime(year, month, day));
+            var result = Calendar.CalendarPage.InitWeekNumbers(inputDistribution.ToList(), new DateTime(year, month, day));
 
             Assert.AreEqual(expected,result);
         }
@@ -156,7 +131,7 @@ namespace Calendar
         [TestCase(15, 3)]
         public void GetWeekOfYear_DayOfYear_ReturnsWeekOfYear(int dayOfYear, int expected)
         {
-            var result = Calendar.GetWeekOfYear(dayOfYear);
+            var result = Calendar.CalendarPage.GetWeekOfYear(dayOfYear);
 
             Assert.AreEqual(expected, result);
         }

@@ -4,13 +4,15 @@ using System.Linq;
 
 namespace Calendar
 {
-    class CalendarRender
+    class CalendarPageRender
     {
         private const float PointsPerInch = 72;
         private const string FontName = "Times";
         private const float TextPadding = 10f;
         private const int CalendarHeaderFieldsCount = 3;
         private const int MinTextWidthForCalendarValues = 2;
+        private const int CalendarPageWidth = 300;
+        private const int CalendarPageHeight = 300;
 
         private static readonly string[] MonthNames =
         {
@@ -34,30 +36,31 @@ namespace Calendar
         private static readonly Color SundayColor = Color.FromArgb(255, 255, 88, 88);
         private static readonly Color DateBackColor = Color.FromArgb(255, 185, 185, 245);
 
-        private readonly Calendar calendar;
-        private readonly Graphics graphics;
-        private readonly SizeF size;
+        private readonly CalendarPage calendarPage;
+        private readonly Size size;
         private readonly SizeF cellSize;
         private readonly SizeF rowSize;
 
-        public CalendarRender(Calendar calendar, Graphics graphics, Size size)
+        private Graphics graphics;
+
+        public CalendarPageRender(CalendarPage calendarPage)
         {
-            this.calendar = calendar;
-            this.graphics = graphics;
-            this.size = size;
+            this.calendarPage = calendarPage;
+            size = new Size(CalendarPageWidth, CalendarPageHeight);
             cellSize = new SizeF(
-                this.size.Width / Calendar.DistributionByDayOfWeekMatrixWidth,
-                this.size.Height / (calendar.DistributionByDaysOfTheWeek.Length + CalendarHeaderFieldsCount));
+                (float)size.Width / CalendarPage.DistributionByDayOfWeekMatrixWidth,
+                (float)size.Height / (calendarPage.DistributionByDaysOfTheWeek.Length + CalendarHeaderFieldsCount));
             rowSize = new SizeF(size.Width, cellSize.Height);
         }
 
-        public void Draw()
+        public Bitmap Draw()
         {
-            if (size.Width < 1 || size.Height < 1)
-                return;
+            var calendarPageImage = new Bitmap(size.Width, size.Height);
+            graphics = Graphics.FromImage(calendarPageImage);
             DrawCalendarBackground(new RectangleF(new PointF(0, 0), size));
             DrawCalendarHeader(new PointF(0, 0));
             DrawCalendarContent(new PointF(0, cellSize.Height * CalendarHeaderFieldsCount));
+            return calendarPageImage;
         }
 
         private void DrawCalendarBackground(RectangleF calendarArea)
@@ -68,7 +71,7 @@ namespace Calendar
         private void DrawCalendarHeader(PointF origin)
         {
             var header = String.Format("{0} {1} {2} г.",
-                calendar.Date.Day, MonthNames[calendar.Date.Month], calendar.Date.Year);
+                calendarPage.Date.Day, MonthNames[calendarPage.Date.Month], calendarPage.Date.Year);
             DrawString(header, ForeColor, new RectangleF(origin, rowSize));
             DrawZodiacalSign(new PointF(origin.X, origin.Y + cellSize.Height));
             DrawString("#", ForeColor, new RectangleF(new PointF(origin.X, origin.Y + cellSize.Height * 2), cellSize));
@@ -77,7 +80,7 @@ namespace Calendar
 
         private void DrawZodiacalSign(PointF origin)
         {
-            var zodiacalSign = String.Format("Знак Зодиака: {0}", ZodiacalSign.GetZodiacalSign(calendar.Date));
+            var zodiacalSign = String.Format("Знак Зодиака: {0}", ZodiacalSign.GetZodiacalSign(calendarPage.Date));
             DrawString(zodiacalSign, ForeColor, new RectangleF(origin, rowSize));
         }
 
@@ -99,7 +102,7 @@ namespace Calendar
         private void DrawWeekNumbers(PointF origin)
         {
             var y = origin.Y;
-            foreach (var weekNumber in calendar.DistributionByDaysOfTheWeek.Select(week => week[0].ToString()))
+            foreach (var weekNumber in calendarPage.DistributionByDaysOfTheWeek.Select(week => week[0].ToString()))
             {
                 DrawString(weekNumber, MinTextWidthForCalendarValues, FontStyle.Italic,
                     WeekNumberColor, new RectangleF(new PointF(origin.X, y), cellSize));
@@ -110,22 +113,22 @@ namespace Calendar
         private PointF GetDateLocation()
         {
             return
-                new PointF(calendar.DayLocation.Item2 * cellSize.Width,
-                    (calendar.DayLocation.Item1 + CalendarHeaderFieldsCount) * cellSize.Height);
+                new PointF(calendarPage.DayLocation.Item2 * cellSize.Width,
+                    (calendarPage.DayLocation.Item1 + CalendarHeaderFieldsCount) * cellSize.Height);
         }
 
         private void DrawDaysOfTheWeek(PointF origin)
         {
             var p = new PointF(origin.X, origin.Y);
-            for (var i = 0; i < calendar.DistributionByDaysOfTheWeek.Length; i++, p.X = origin.X, p.Y += cellSize.Height)
-                for (var j = 1; j < calendar.DistributionByDaysOfTheWeek[i].Length; j++, p.X += cellSize.Width)
+            for (var i = 0; i < calendarPage.DistributionByDaysOfTheWeek.Length; i++, p.X = origin.X, p.Y += cellSize.Height)
+                for (var j = 1; j < calendarPage.DistributionByDaysOfTheWeek[i].Length; j++, p.X += cellSize.Width)
                     DrawString(GetDayNumber(i, j), MinTextWidthForCalendarValues,
                         j % 7 == 0 ? SundayColor : ForeColor, new RectangleF(p, cellSize));
         }
 
         private string GetDayNumber(int week, int dayOfWeek)
         {
-            var dayNumberValue = calendar.DistributionByDaysOfTheWeek[week][dayOfWeek];
+            var dayNumberValue = calendarPage.DistributionByDaysOfTheWeek[week][dayOfWeek];
             var dayNumber = dayNumberValue == 0 ? "" : dayNumberValue.ToString();
             return dayNumber;
         }

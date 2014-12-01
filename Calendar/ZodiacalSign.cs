@@ -3,6 +3,7 @@ using System.Linq;
 
 namespace Calendar
 {
+    // знак зодиака пока уберем, надо хотя бы основной код сделать приемлемым
     class ZodiacalSign
     {
         public static readonly Tuple<int, int, string>[] DateRangeToZodiacalSignMap =
