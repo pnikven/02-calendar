@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Drawing;
 
-namespace Calendar
+namespace Calendar.PageRenders
 {
-    class SimplePageRender : IPageRender
+    class PageRender : IPageRender
     {
         private const float PointsPerInch = 72;
         private const string FontName = "Times";

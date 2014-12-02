@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Drawing;
 using System.Globalization;
+using Calendar.PageFactories;
+using Calendar.PageRenders;
 
 namespace Calendar
 {
@@ -8,17 +10,17 @@ namespace Calendar
     {
         private readonly string inputDate;
 
-        private IPageDataFactory _pageDataFactory;
         private IPageRender _pageRender;
+        private IDatePageFactory _datePageFactory;
 
         private void SetPageRander(IPageRender pageRender)
         {
             _pageRender = pageRender;
         }
 
-        private void SetPageDataFactory(IPageDataFactory pageDataFactory)
+        private void SetPageFactory(IDatePageFactory datePageFactory)
         {
-            _pageDataFactory = pageDataFactory;
+            _datePageFactory = datePageFactory;
         }
 
         static void Main(string[] args)
@@ -26,8 +28,8 @@ namespace Calendar
             try
             {
                 var program = new Program(args);
-                program.SetPageDataFactory(new CalendarPageDataFactory());
-                program.SetPageRander(new SimplePageRender());
+                program.SetPageRander(new PageRender());
+                program.SetPageFactory(new CalendarPageFactory());
                 program.Start();
             }
             catch (Exception e)
@@ -48,7 +50,7 @@ namespace Calendar
             var culture = new CultureInfo("ru-RU");
             var date = DateTime.Parse(inputDate, culture);
 
-            PageElement page = _pageDataFactory.Create(date);
+            PageElement page = _datePageFactory.Create(date);
             Bitmap pageImage = _pageRender.Draw(page);
 
             var outputPageImageFilename = String.Format("Calendar Page for {0}.{1}.{2}.bmp",

@@ -1,6 +1,6 @@
 using System.Drawing;
 
-namespace Calendar
+namespace Calendar.PageRenders
 {
     interface IPageRender
     {

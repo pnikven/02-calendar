@@ -18,6 +18,10 @@ namespace Calendar
         public Color BackgroundColor { get; set; }
         public Color ForegroundColor { get; set; }
         public string Text { get; set; }
+        public int ChildrenCount
+        {
+            get { return children.Count; }
+        }
 
         private readonly Color _defaultBackgroundColor = Color.White;
         private readonly Color _defaultForegroundColor = Color.Black;
@@ -50,6 +54,11 @@ namespace Calendar
         public List<PageElement> GetChildren()
         {
             return children;
+        }
+
+        public PageElement GetChild(int index)
+        {
+            return children[index];
         }
 
         public SizeF ConsumedSizeRelativeToParent()
