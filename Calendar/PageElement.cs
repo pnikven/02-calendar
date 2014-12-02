@@ -4,29 +4,76 @@ using System.Drawing;
 
 namespace Calendar
 {
+    enum PageElementType
+    {
+        Block,
+        Inline
+    }
+
     abstract class PageElement
     {
+        public PageElement Parent { get; private set; }
+
         private readonly List<PageElement> children = new List<PageElement>();
 
-        public virtual void AddChildElement(PageElement pageElement)
+        public virtual void AddChild(PageElement pageElement)
         {
+            if (!ChildIsSupported(pageElement.GetType()))
+                throw new Exception(String.Format("Page element of type {0} can't contain children of type {1}",
+                    GetType(), pageElement.GetType()));
             children.Add(pageElement);
+            pageElement.Parent = this;
+        }
+
+        public void AddChildRange(PageElement[] pageElements)
+        {
+            foreach (var pageElement in pageElements)
+            {
+                AddChild(pageElement);
+            }
         }
 
         public List<PageElement> GetChildren()
         {
             return children;
         }
+
+        public SizeF ConsumedSizeRelativeToParent()
+        {
+            switch (GetPageElementType())
+            {
+                case PageElementType.Block:
+                    return new SizeF(1, 1f / Parent.GetChildren().Count);
+                case PageElementType.Inline:
+                    return new SizeF(1f / Parent.GetChildren().Count, 1);
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        public abstract PageElementType GetPageElementType();
+        protected abstract bool ChildIsSupported(Type typeOfChild);
     }
 
     class RootElement : PageElement
     {
+        public Color BackgroundColor { get; private set; }
+
         public RootElement(Color backgroundColor)
         {
             BackgroundColor = backgroundColor;
         }
 
-        public Color BackgroundColor { get; private set; }
+        public override PageElementType GetPageElementType()
+        {
+            return PageElementType.Block;
+        }
+
+        protected override bool ChildIsSupported(Type typeOfChild)
+        {
+            return typeOfChild == typeof(TextElement) ||
+                   typeOfChild == typeof(RowElement);
+        }
     }
 
     class TextElement : PageElement
@@ -34,56 +81,49 @@ namespace Calendar
         public Color TextColor { get; set; }
         public string Text { get; private set; }
 
-        public TextElement(string headerText, Color color)
+        public TextElement(string text, Color color)
         {
-            Text = headerText;
+            Text = text;
             TextColor = color;
         }
 
-        public override void AddChildElement(PageElement pageElement)
+        public override PageElementType GetPageElementType()
         {
-            throw new Exception(GetType() + " can not contain child elements");
+            return PageElementType.Block;
         }
-    }
 
-    class HeaderElement : TextElement
-    {
-        public HeaderElement(string headerText, Color color)
-            : base(headerText, color)
+        protected override bool ChildIsSupported(Type typeOfChild)
         {
+            return false;
         }
     }
 
     class CellElement : TextElement
     {
-        public PageElement Parent { get; private set; }
         public bool IsMarked { get; private set; }
 
-        public CellElement(string text, Color color, PageElement parent, bool isMarked)
+        public CellElement(string text, Color color, bool isMarked)
             : base(text, color)
         {
-            Parent = parent;
             IsMarked = isMarked;
         }
-    }
 
-    class TableElement : PageElement
-    {
-        public override void AddChildElement(PageElement pageElement)
+        public override PageElementType GetPageElementType()
         {
-            if (pageElement.GetType() != typeof(RowElement))
-                throw new Exception("Table element can contain only row elements");
-            base.AddChildElement(pageElement);
+            return PageElementType.Inline;
         }
     }
 
     class RowElement : PageElement
     {
-        public override void AddChildElement(PageElement pageElement)
+        public override PageElementType GetPageElementType()
         {
-            if (pageElement.GetType() != typeof(CellElement))
-                throw new Exception("Row element can contain only cell elements");
-            base.AddChildElement(pageElement);
+            return PageElementType.Block;
+        }
+
+        protected override bool ChildIsSupported(Type typeOfChild)
+        {
+            return typeOfChild == typeof(CellElement);
         }
     }
 }

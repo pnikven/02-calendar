@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 
 namespace Calendar
@@ -18,84 +19,53 @@ namespace Calendar
             LineAlignment = StringAlignment.Center
         };
 
-        private readonly Size size = new Size(PageWidth, PageHeight);
+        private readonly Size pageSize = new Size(PageWidth, PageHeight);
 
-        private SizeF rowSize;
         private Graphics graphics;
-
-        private int GetPageElementRowCount(PageElement pageElement)
-        {
-            var result = 0;
-            foreach (var child in pageElement.GetChildren())
-            {
-                if (child.GetType() == typeof(TableElement))
-                    result += child.GetChildren().Count;
-                else
-                    result++;
-            }
-            return result;
-        }
 
         public Bitmap Draw(PageElement page)
         {
-            rowSize = new SizeF(size.Width, (float)size.Height / GetPageElementRowCount(page));
-            var pageImage = new Bitmap(size.Width, size.Height);
+            var pageImage = new Bitmap(pageSize.Width, pageSize.Height);
             graphics = Graphics.FromImage(pageImage);
-            DrawElement(page, new PointF(0, 0));
+            DrawElement(page, new PointF(0, 0), pageSize);
             return pageImage;
         }
 
-        private void DrawElement(PageElement pageElement, PointF origin)
+        private void DrawElement(PageElement pageElement, PointF origin, SizeF size)
         {
-            if (pageElement.GetType() == typeof (RootElement))
+            if (pageElement.GetType() == typeof(RootElement))
             {
                 DrawPageBackground(new RectangleF(new PointF(0, 0), size),
                     ((RootElement)pageElement).BackgroundColor);
             }
-            if (pageElement.GetType() == typeof(TextElement))
+            else if (pageElement.GetType() == typeof(TextElement))
             {
                 DrawString(((TextElement)pageElement).Text, ((TextElement)pageElement).TextColor,
-                    new RectangleF(origin, rowSize));
+                    new RectangleF(origin, size));
             }
             else if (pageElement.GetType() == typeof(CellElement))
             {
-                DrawString(((CellElement)pageElement).Text, MinTextWidthForCellElement, 
+                DrawString(((CellElement)pageElement).Text, MinTextWidthForCellElement,
                     ((CellElement)pageElement).TextColor,
-                    new RectangleF(origin, new SizeF(
-                        (float)size.Width / ((CellElement)pageElement).Parent.GetChildren().Count, rowSize.Height)));
+                    new RectangleF(origin, size));
             }
-            else
-            {
-                var x = origin.X;
-                var y = origin.Y;
-                foreach (PageElement child in pageElement.GetChildren())
-                {
-                    DrawElement(child, new PointF(x, y));
-                    x += GetElementSize(child).Width;
-                    y += GetElementSize(child).Height;
-                }
-            }
+            DrawChildren(pageElement, origin, size);
         }
 
-        private SizeF GetElementSize(PageElement pageElement)
+        private void DrawChildren(PageElement pageElement, PointF origin, SizeF size)
         {
-            if (pageElement.GetType() == typeof(RowElement))
+            var x = origin.X;
+            var y = origin.Y;
+            foreach (PageElement child in pageElement.GetChildren())
             {
-                return new SizeF(0, rowSize.Height);
+                SizeF relativeSize = child.ConsumedSizeRelativeToParent();
+                SizeF absoluteSize = new SizeF(size.Width*relativeSize.Width, size.Height*relativeSize.Height);
+                DrawElement(child, new PointF(x, y), absoluteSize);
+                if (child.GetPageElementType() == PageElementType.Block)
+                    y += absoluteSize.Height;
+                else if (child.GetPageElementType() == PageElementType.Inline)
+                    x += absoluteSize.Width;
             }
-            if (pageElement.GetType() == typeof(TextElement))
-            {
-                return new SizeF(0, rowSize.Height);
-            }
-            if (pageElement.GetType() == typeof(CellElement))
-            {
-                return new SizeF((float)size.Width / ((CellElement)pageElement).Parent.GetChildren().Count, 0);
-            }
-            if (pageElement.GetType() == typeof(TableElement))
-            {
-                return new SizeF(0, rowSize.Height * pageElement.GetChildren().Count);
-            }
-            throw new Exception("PageElement type " + pageElement.GetType() + " is not recognized");
         }
 
         private void DrawPageBackground(RectangleF pageArea, Color color)

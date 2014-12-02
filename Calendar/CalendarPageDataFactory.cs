@@ -17,44 +17,42 @@ namespace Calendar
         public PageElement Create(DateTime date)
         {
             var page = new RootElement(BackColor);
-            page.AddChildElement(new TextElement(
+            page.AddChild(new TextElement(
                 String.Format("{0} {1}", DateTimeFormatInfo.InvariantInfo.GetMonthName(date.Month), date.Year),
                 ForeColor));
-            page.AddChildElement(BuildCalendarPageDataGridHeader());
+            page.AddChild(BuildCalendarPageDataGridHeader());
             IEnumerable<Week> weeks = CalculateCalendarPageWeeks(date);
-            page.AddChildElement(BuildCalendarPageDataGrid(weeks));
+            page.AddChildRange(BuildCalendarPageDataGrid(weeks));
             return page;
         }
 
-        private PageElement BuildCalendarPageDataGridHeader()
+        private RowElement BuildCalendarPageDataGridHeader()
         {
-            var row=new RowElement();            
+            var result = new RowElement();
             foreach (var dayOfWeek in Enum.GetValues(typeof(DayOfWeek)))
             {
-                row.AddChildElement(
-                    new CellElement(DateTimeFormatInfo.InvariantInfo.GetAbbreviatedDayName((DayOfWeek)dayOfWeek), 
-                        ForeColor, row, false));
+                result.AddChild(
+                    new CellElement(DateTimeFormatInfo.InvariantInfo.GetAbbreviatedDayName((DayOfWeek)dayOfWeek),
+                        ForeColor, false));
             }
-            var table=new TableElement();
-            table.AddChildElement(row);
-            return table;
+            return result;
         }
 
-        private TableElement BuildCalendarPageDataGrid(IEnumerable<Week> weeks)
+        private PageElement[] BuildCalendarPageDataGrid(IEnumerable<Week> weeks)
         {
-            var tableElement = new TableElement();
+            var result = new List<RowElement>();
             foreach (var week in weeks)
             {
-                PageElement rowElement = new RowElement();
+                var rowElement = new RowElement();
                 foreach (var weekDay in week.WeekDays)
                 {
-                    rowElement.AddChildElement(new CellElement(weekDay.Number.ToString(),
+                    rowElement.AddChild(new CellElement(weekDay.Number.ToString(),
                         GetColorForWeekDay(weekDay),
-                        rowElement, weekDay.IsSelected));
+                        weekDay.IsSelected));
                 }
-                tableElement.AddChildElement(rowElement);
+                result.Add(rowElement);
             }
-            return tableElement;
+            return result.ToArray();
         }
 
         private Color GetColorForWeekDay(WeekDay weekDay)
