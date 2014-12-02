@@ -6,26 +6,40 @@ namespace Calendar
 {
     enum PageElementType
     {
+        Root,
         Block,
         Inline
     }
 
-    abstract class PageElement
+    class PageElement
     {
         public PageElement Parent { get; private set; }
+        public PageElementType ElementType { get; private set; }
+        public Color BackgroundColor { get; set; }
+        public Color ForegroundColor { get; set; }
+        public string Text { get; set; }
 
+        private readonly Color _defaultBackgroundColor = Color.White;
+        private readonly Color _defaultForegroundColor = Color.Black;
         private readonly List<PageElement> children = new List<PageElement>();
 
-        public virtual void AddChild(PageElement pageElement)
+        public PageElement(PageElementType elementType)
         {
-            if (!ChildIsSupported(pageElement.GetType()))
-                throw new Exception(String.Format("Page element of type {0} can't contain children of type {1}",
-                    GetType(), pageElement.GetType()));
-            children.Add(pageElement);
-            pageElement.Parent = this;
+            ElementType = elementType;
+            BackgroundColor = _defaultBackgroundColor;
+            ForegroundColor = _defaultForegroundColor;
         }
 
-        public void AddChildRange(PageElement[] pageElements)
+        public virtual void AddChild(PageElement child)
+        {
+            if (!ChildIsSupported(child))
+                throw new Exception(String.Format("Page element of type {0} can't contain children of type {1}",
+                   ElementType, child.ElementType));
+            children.Add(child);
+            child.Parent = this;
+        }
+
+        public void AddChildRange(IEnumerable<PageElement> pageElements)
         {
             foreach (var pageElement in pageElements)
             {
@@ -40,7 +54,7 @@ namespace Calendar
 
         public SizeF ConsumedSizeRelativeToParent()
         {
-            switch (GetPageElementType())
+            switch (ElementType)
             {
                 case PageElementType.Block:
                     return new SizeF(1, 1f / Parent.GetChildren().Count);
@@ -51,79 +65,24 @@ namespace Calendar
             }
         }
 
-        public abstract PageElementType GetPageElementType();
-        protected abstract bool ChildIsSupported(Type typeOfChild);
-    }
-
-    class RootElement : PageElement
-    {
-        public Color BackgroundColor { get; private set; }
-
-        public RootElement(Color backgroundColor)
+        private bool ChildIsSupported(PageElement child)
         {
-            BackgroundColor = backgroundColor;
+            switch (ElementType)
+            {
+                case PageElementType.Root:
+                    return child.ElementType == PageElementType.Block;
+                case PageElementType.Block:
+                    return child.ElementType == PageElementType.Inline;
+                case PageElementType.Inline:
+                    return false;
+                default:
+                    throw new Exception("ElementType is not recognized");
+            }
         }
 
-        public override PageElementType GetPageElementType()
+        public bool HasText()
         {
-            return PageElementType.Block;
-        }
-
-        protected override bool ChildIsSupported(Type typeOfChild)
-        {
-            return typeOfChild == typeof(TextElement) ||
-                   typeOfChild == typeof(RowElement);
-        }
-    }
-
-    class TextElement : PageElement
-    {
-        public Color TextColor { get; set; }
-        public string Text { get; private set; }
-
-        public TextElement(string text, Color color)
-        {
-            Text = text;
-            TextColor = color;
-        }
-
-        public override PageElementType GetPageElementType()
-        {
-            return PageElementType.Block;
-        }
-
-        protected override bool ChildIsSupported(Type typeOfChild)
-        {
-            return false;
-        }
-    }
-
-    class CellElement : TextElement
-    {
-        public bool IsMarked { get; private set; }
-
-        public CellElement(string text, Color color, bool isMarked)
-            : base(text, color)
-        {
-            IsMarked = isMarked;
-        }
-
-        public override PageElementType GetPageElementType()
-        {
-            return PageElementType.Inline;
-        }
-    }
-
-    class RowElement : PageElement
-    {
-        public override PageElementType GetPageElementType()
-        {
-            return PageElementType.Block;
-        }
-
-        protected override bool ChildIsSupported(Type typeOfChild)
-        {
-            return typeOfChild == typeof(CellElement);
+            return Text != null;
         }
     }
 }

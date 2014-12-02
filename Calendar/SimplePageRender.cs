@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Drawing;
 
 namespace Calendar
@@ -8,8 +7,6 @@ namespace Calendar
     {
         private const float PointsPerInch = 72;
         private const string FontName = "Times";
-        private const float TextPadding = 10f;
-        private const int MinTextWidthForCellElement = 2;
         private const int PageWidth = 300;
         private const int PageHeight = 300;
 
@@ -33,37 +30,26 @@ namespace Calendar
 
         private void DrawElement(PageElement pageElement, PointF origin, SizeF size)
         {
-            if (pageElement.GetType() == typeof(RootElement))
-            {
-                DrawPageBackground(new RectangleF(new PointF(0, 0), size),
-                    ((RootElement)pageElement).BackgroundColor);
-            }
-            else if (pageElement.GetType() == typeof(TextElement))
-            {
-                DrawString(((TextElement)pageElement).Text, ((TextElement)pageElement).TextColor,
-                    new RectangleF(origin, size));
-            }
-            else if (pageElement.GetType() == typeof(CellElement))
-            {
-                DrawString(((CellElement)pageElement).Text, MinTextWidthForCellElement,
-                    ((CellElement)pageElement).TextColor,
-                    new RectangleF(origin, size));
-            }
+            DrawPageBackground(new RectangleF(origin, size), pageElement.BackgroundColor);
+            if (pageElement.HasText())
+                DrawString(pageElement.Text, pageElement.ForegroundColor, new RectangleF(origin, size));
             DrawChildren(pageElement, origin, size);
         }
 
-        private void DrawChildren(PageElement pageElement, PointF origin, SizeF size)
+        private void DrawChildren(PageElement pageElement, PointF origin, SizeF parentSize)
         {
             var x = origin.X;
             var y = origin.Y;
             foreach (PageElement child in pageElement.GetChildren())
             {
                 SizeF relativeSize = child.ConsumedSizeRelativeToParent();
-                SizeF absoluteSize = new SizeF(size.Width*relativeSize.Width, size.Height*relativeSize.Height);
+                var absoluteSize = new SizeF(
+                    parentSize.Width * relativeSize.Width, 
+                    parentSize.Height * relativeSize.Height);
                 DrawElement(child, new PointF(x, y), absoluteSize);
-                if (child.GetPageElementType() == PageElementType.Block)
+                if (child.ElementType == PageElementType.Block)
                     y += absoluteSize.Height;
-                else if (child.GetPageElementType() == PageElementType.Inline)
+                else if (child.ElementType == PageElementType.Inline)
                     x += absoluteSize.Width;
             }
         }
@@ -73,14 +59,14 @@ namespace Calendar
             graphics.FillRectangle(new SolidBrush(color), pageArea);
         }
 
-        private Font CreateFontThatFitToGivenSize(string text, SizeF sizeF, FontStyle fontStyle)
+        private Font CreateFontThatFitToGivenSize(string text, SizeF sizeF)
         {
-            var font = new Font(FontName, PixelToPoint(graphics.DpiY, sizeF.Height), fontStyle);
-            var actualTextWidth = graphics.MeasureString(text, font).Width + TextPadding;
-            if (actualTextWidth <= sizeF.Width)
+            var font = new Font(FontName, PixelToPoint(graphics.DpiY, sizeF.Height));
+            var actualTextSize = graphics.MeasureString(text, font);
+            if (actualTextSize.Width < sizeF.Width && actualTextSize.Height <= sizeF.Height)
                 return font;
-            var scaleFactor = sizeF.Width / actualTextWidth;
-            font = new Font(FontName, font.SizeInPoints * scaleFactor, fontStyle);
+            var scaleFactor = Math.Min(sizeF.Width / actualTextSize.Width, sizeF.Height / actualTextSize.Height);
+            font = new Font(FontName, font.SizeInPoints * scaleFactor);
             return font;
         }
 
@@ -93,13 +79,7 @@ namespace Calendar
 
         private void DrawString(string text, Color color, RectangleF drawArea)
         {
-            var font = CreateFontThatFitToGivenSize(text, drawArea.Size, FontStyle.Regular);
-            graphics.DrawString(text, font, new SolidBrush(color), drawArea, _alignCenter);
-        }
-
-        private void DrawString(string text, int minTextWidth, Color color, RectangleF drawArea)
-        {
-            var font = CreateFontThatFitToGivenSize(text.PadLeft(minTextWidth, '0'), drawArea.Size, FontStyle.Regular);
+            var font = CreateFontThatFitToGivenSize(text, drawArea.Size);
             graphics.DrawString(text, font, new SolidBrush(color), drawArea, _alignCenter);
         }
     }

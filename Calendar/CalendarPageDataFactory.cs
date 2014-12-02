@@ -16,50 +16,58 @@ namespace Calendar
 
         public PageElement Create(DateTime date)
         {
-            var page = new RootElement(BackColor);
-            page.AddChild(new TextElement(
-                String.Format("{0} {1}", DateTimeFormatInfo.InvariantInfo.GetMonthName(date.Month), date.Year),
-                ForeColor));
-            page.AddChild(BuildCalendarPageDataGridHeader());
-            IEnumerable<Week> weeks = CalculateCalendarPageWeeks(date);
-            page.AddChildRange(BuildCalendarPageDataGrid(weeks));
+            var page = new PageElement(PageElementType.Root);
+            page.AddChild(BuildMonthAndYearHeader(date));
+            page.AddChild(BuildDaysOfWeekHeader());
+            page.AddChildRange(BuildWeeksGrid(date));
             return page;
         }
 
-        private RowElement BuildCalendarPageDataGridHeader()
+        private PageElement BuildMonthAndYearHeader(DateTime date)
         {
-            var result = new RowElement();
-            foreach (var dayOfWeek in Enum.GetValues(typeof(DayOfWeek)))
+            return new PageElement(PageElementType.Block)
             {
-                result.AddChild(
-                    new CellElement(DateTimeFormatInfo.InvariantInfo.GetAbbreviatedDayName((DayOfWeek)dayOfWeek),
-                        ForeColor, false));
-            }
-            return result;
+                Text = String.Format("{0} {1}", DateTimeFormatInfo.InvariantInfo.GetMonthName(date.Month), date.Year),
+                ForegroundColor = ForeColor
+            };
         }
 
-        private PageElement[] BuildCalendarPageDataGrid(IEnumerable<Week> weeks)
+        private PageElement BuildDaysOfWeekHeader()
         {
-            var result = new List<RowElement>();
-            foreach (var week in weeks)
-            {
-                var rowElement = new RowElement();
-                foreach (var weekDay in week.WeekDays)
-                {
-                    rowElement.AddChild(new CellElement(weekDay.Number.ToString(),
-                        GetColorForWeekDay(weekDay),
-                        weekDay.IsSelected));
-                }
-                result.Add(rowElement);
-            }
-            return result.ToArray();
+            var header = new PageElement(PageElementType.Block);
+            header.AddChildRange(Enumerable.Range(0, 7)
+                    .Select(i => new PageElement(PageElementType.Inline)
+                    {
+                        Text = DateTimeFormatInfo.InvariantInfo.GetAbbreviatedDayName((DayOfWeek)i),
+                        ForegroundColor = ForeColor
+                    }));
+            return header;
+        }
+
+        private IEnumerable<PageElement> BuildWeeksGrid(DateTime date)
+        {
+            IEnumerable<Week> weeks = CalculateCalendarPageWeeks(date);
+            return weeks
+                .Select(BuildWeekRow);
+        }
+
+        private PageElement BuildWeekRow(Week week)
+        {
+            var weekRow = new PageElement(PageElementType.Block);
+            weekRow.AddChildRange(week.WeekDays
+                .Select(weekDay => new PageElement(PageElementType.Inline)
+                    {
+                        Text = weekDay.Number.ToString(CultureInfo.InvariantCulture),
+                        ForegroundColor = GetColorForWeekDay(weekDay),
+                        BackgroundColor = weekDay.IsSelected ? SelectedDateBackColor : BackColor
+                    }));
+            return weekRow;
         }
 
         private Color GetColorForWeekDay(WeekDay weekDay)
         {
             if (weekDay.BelongsToSelectedMonth) return OtherMonthDayColor;
-            if (weekDay.IsSunday) return SundayColor;
-            return ForeColor;
+            return weekDay.IsSunday ? SundayColor : ForeColor;
         }
 
         private IEnumerable<Week> CalculateCalendarPageWeeks(DateTime selectedDate)
@@ -102,6 +110,5 @@ namespace Calendar
             IsSelected = date == selectedDate;
             IsSunday = date.DayOfWeek == DayOfWeek.Sunday;
         }
-
     }
 }
