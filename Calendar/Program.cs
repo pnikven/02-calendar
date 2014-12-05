@@ -10,26 +10,11 @@ namespace Calendar
     {
         private readonly string inputDate;
 
-        private IPageRender _pageRender;
-        private IDatePageFactory _datePageFactory;
-
-        private void SetPageRander(IPageRender pageRender)
-        {
-            _pageRender = pageRender;
-        }
-
-        private void SetPageFactory(IDatePageFactory datePageFactory)
-        {
-            _datePageFactory = datePageFactory;
-        }
-
         static void Main(string[] args)
         {
             try
             {
                 var program = new Program(args);
-                program.SetPageRander(new PageRender());
-                program.SetPageFactory(new CalendarPageFactory());
                 program.Start();
             }
             catch (Exception e)
@@ -50,8 +35,10 @@ namespace Calendar
             var culture = new CultureInfo("ru-RU");
             var date = DateTime.Parse(inputDate, culture);
 
-            PageElement page = _datePageFactory.Create(date);
-            Bitmap pageImage = _pageRender.Draw(page);
+            var pageFactory = new CalendarPageFactory();
+            var pageRender = new PageRender();
+            var imageGenerator = new CalendarPageImageGenerator(pageFactory, pageRender);
+            Bitmap pageImage = imageGenerator.GenerateCalendarPageImageByDate(date);
 
             var outputPageImageFilename = String.Format("Calendar Page for {0}.{1}.{2}.bmp",
                 date.Day, date.Month, date.Year);

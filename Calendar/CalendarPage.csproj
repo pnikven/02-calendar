@@ -49,6 +49,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CalendarPageImageGenerator.cs" />
     <Compile Include="Tests\CalendarPageDataProviderTests.cs" />
     <Compile Include="PageFactories\CalendarPageFactory.cs" />
     <Compile Include="CalendarPageDataProvider.cs" />
